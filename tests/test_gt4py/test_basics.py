@@ -24,7 +24,7 @@ def test_copy() -> None:
         in_fld: gts.Field[DTYPE],
         out_fld: gts.Field[DTYPE],
     ) -> None:
-        """Copy the field."""
+        """Copy the input field to the output field."""
         with computation(PARALLEL), interval(...):
             out_fld = in_fld[0, 0, 0]
 
@@ -84,13 +84,13 @@ def test_vertical_shift_periodic() -> None:
         in_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
     )
     wk2d_store = gt4py.storage.empty(
-        shape=(nx, ny), mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
     out_store = gt4py.storage.from_array(
         out_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
     )
 
-    # Create test reference and make sure it doesn't validate yet
+    # Create test reference and make sure the output array doesn't validate yet
     ref = np.dstack([in_data[:, :, -2:], in_data[:, :, :-2]])
     assert not np.equal(in_store, ref).all()
 
@@ -98,7 +98,7 @@ def test_vertical_shift_periodic() -> None:
     shift_up(in_store, wk2d_store, out_store)
     shift_up(out_store, wk2d_store, in_store)
 
-    # Now the field validates against the reference
+    # Now the output field validates
     assert np.equal(in_store, ref).all()
 
 
@@ -142,7 +142,7 @@ def test_vert_intp_full() -> None:
         grid_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
     )
     intp_store = gt4py.storage.empty(
-        shape=(nx, ny), mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
 
     # Create test reference and ensure the output array doesn't validate yet
