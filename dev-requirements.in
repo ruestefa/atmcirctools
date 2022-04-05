@@ -1,0 +1,15 @@
+anaconda-client
+black
+conda-build
+flake8
+ipdb
+ipython
+isort
+mccabe
+mypy>=0.941
+pre-commit
+pylint
+pytest
+tox>=3.0.0
+tox-conda
+types-setuptools

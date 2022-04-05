@@ -1,3 +1,1 @@
-# DPV-TH
-
-Compute gradient of PV on TH surfaces.
+# DPV-TH: Compute gradient of PV on TH surfaces.
