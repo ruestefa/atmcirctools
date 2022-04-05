@@ -55,7 +55,7 @@ def test_copy() -> None:
 
 
 def test_vertical_shift_periodic() -> None:
-    """Shift a field vertically upward twice, with periodic vertical axis."""
+    """Shift a field upward twice, whereby the vertical axis acts as periodic."""
 
     @gts.stencil(backend=BACKEND)
     def shift_up(
