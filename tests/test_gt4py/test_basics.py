@@ -116,7 +116,6 @@ def test_vert_intp_full() -> None:
         grid_fld: gts.Field[gts.IJK, DTYPE],
         val: float,
         intp_fld: gts.Field[gts.IJ, DTYPE],
-        wk1_fld: gts.Field[gts.IJ, DTYPE],
     ) -> None:
         """Shift field upward by one, moving the uppermost layer to the bottom."""
         with computation(FORWARD), interval(-1, None):
@@ -145,16 +144,13 @@ def test_vert_intp_full() -> None:
     intp_store = gt4py.storage.empty(
         shape=(nx, ny), mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
-    wk1_store = gt4py.storage.empty(
-        shape=(nx, ny), mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
-    )
 
     # Create test reference and ensure the output array doesn't validate yet
     ref = np.take(in_data, np.where(grid_data < val, 1, 0).sum(axis=2).clip(max=nz - 1))
     assert not np.equal(intp_store, ref).all()
 
     # Run test: Interpolate field to surface
-    interpolate(in_store, grid_store, val, intp_store, wk1_store)
+    interpolate(in_store, grid_store, val, intp_store)
 
     # Now the output array validates
     assert np.equal(intp_store, ref).all()
