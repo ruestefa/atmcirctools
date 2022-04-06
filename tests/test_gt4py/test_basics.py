@@ -264,70 +264,140 @@ def test_vert_intp_between() -> None:
 def test_horiz_grad() -> None:
     """Compute the horizontal gradient of a 3D field."""
 
-    def gradient(
-        fld: npt.NDArray[np.float_], dxy: float, vnan: float = np.nan
-    ) -> npt.NDArray[np.float_]:
+    def arr_store(
+        arr: npt.NDArray[np.generic],
+        origin: tuple[int, int, int] = (0, 0, 0),
+        *,
+        backend: str = BACKEND,
+        dtype: npt.DTypeLike = DTYPE,
+    ) -> gt_store.Storage:
+        """Create a storage object from an array."""
+        return gt_store.from_array(
+            arr, default_origin=origin, dtype=dtype, backend=backend
+        )
+
+    def empty_store(
+        shape: tuple[int, ...],
+        origin: tuple[int, int, int] = (0, 0, 0),
+        *,
+        backend: str = BACKEND,
+        dtype: npt.DTypeLike = DTYPE,
+    ) -> gt_store.Storage:
+        """Create a storage object from an array."""
+        return gt_store.empty(
+            shape=shape, default_origin=origin, dtype=dtype, backend=backend
+        )
+
+    def gradient(fld: npt.NDArray[np.float_], dxy: float) -> npt.NDArray[np.float_]:
         """Compute the horizontal gradient of a 3D field."""
 
-        @gts.stencil(backend=BACKEND)
-        def grad_x_fw(
-            fld: gts.Field[gts.IJK, DTYPE],
-            dx: float,
-            grad_x: gts.Field[gts.IJK, DTYPE],
-        ) -> None:
-            """Compute forward horizontal gradient in x-direction."""
-            with computation(PARALLEL), interval(...):
-                grad_x = (fld[1, 0, 0] - fld[0, 0, 0]) / dx
+        def grad_x(fld: npt.NDArray[np.float_], dx: float) -> npt.NDArray[np.float_]:
+            """Compute the gradient in x-direction."""
 
-        @gts.stencil(backend=BACKEND)
-        def grad_x_bw(
-            fld: gts.Field[gts.IJK, DTYPE],
-            dx: float,
-            grad_x: gts.Field[gts.IJK, DTYPE],
-        ) -> None:
-            """Compute backward horizontal gradient in x-direction."""
-            with computation(PARALLEL), interval(...):
-                grad_x = (fld[0, 0, 0] - fld[-1, 0, 0]) / dx
+            @gts.stencil(backend=BACKEND)
+            def grad_x_fw(
+                fld: gts.Field[gts.IJK, DTYPE],
+                dx: float,
+                grad_x: gts.Field[gts.IJK, DTYPE],
+            ) -> None:
+                """Compute forward horizontal gradient in x-direction."""
+                with computation(PARALLEL), interval(...):
+                    grad_x = (fld[1, 0, 0] - fld[0, 0, 0]) / dx
 
-        @gts.stencil(backend=BACKEND)
-        def grad_x_c(
-            fld: gts.Field[gts.IJK, DTYPE],
-            dx: float,
-            grad_x: gts.Field[gts.IJK, DTYPE],
-        ) -> None:
-            """Compute central horizontal gradient in x-direction."""
-            with computation(PARALLEL), interval(...):
-                grad_x = (fld[1, 0, 0] - fld[-1, 0, 0]) / (2 * dx)
+            @gts.stencil(backend=BACKEND)
+            def grad_x_bw(
+                fld: gts.Field[gts.IJK, DTYPE],
+                dx: float,
+                grad_x: gts.Field[gts.IJK, DTYPE],
+            ) -> None:
+                """Compute backward horizontal gradient in x-direction."""
+                with computation(PARALLEL), interval(...):
+                    grad_x = (fld[0, 0, 0] - fld[-1, 0, 0]) / dx
 
-        @gts.stencil(backend=BACKEND)
-        def grad_y_fw(
-            fld: gts.Field[gts.IJK, DTYPE],
-            dy: float,
-            grad_y: gts.Field[gts.IJK, DTYPE],
-        ) -> None:
-            """Compute forward horizontal gradient in y-direction."""
-            with computation(PARALLEL), interval(...):
-                grad_y = (fld[0, 1, 0] - fld[0, 0, 0]) / dy
+            @gts.stencil(backend=BACKEND)
+            def grad_x_c(
+                fld: gts.Field[gts.IJK, DTYPE],
+                dx: float,
+                grad_x: gts.Field[gts.IJK, DTYPE],
+            ) -> None:
+                """Compute central horizontal gradient in x-direction."""
+                with computation(PARALLEL), interval(...):
+                    grad_x = (fld[1, 0, 0] - fld[-1, 0, 0]) / (2 * dx)
 
-        @gts.stencil(backend=BACKEND)
-        def grad_y_bw(
-            fld: gts.Field[gts.IJK, DTYPE],
-            dy: float,
-            grad_y: gts.Field[gts.IJK, DTYPE],
-        ) -> None:
-            """Compute backward horizontal gradient in y-direction."""
-            with computation(PARALLEL), interval(...):
-                grad_y = (fld[0, 0, 0] - fld[0, -1, 0]) / dy
+            kwargs = {"backend": BACKEND, "dtype": DTYPE}
 
-        @gts.stencil(backend=BACKEND)
-        def grad_y_c(
-            fld: gts.Field[gts.IJK, DTYPE],
-            dy: float,
-            grad_y: gts.Field[gts.IJK, DTYPE],
-        ) -> None:
-            """Compute central horizontal gradient in y-direction."""
-            with computation(PARALLEL), interval(...):
-                grad_y = (fld[0, 1, 0] - fld[0, -1, 0]) / (2 * dy)
+            fld_x_fw_s = arr_store(fld)
+            grad_x_fw_s = empty_store(shape3d)
+            grad_x_fw(fld_x_fw_s, dxy, grad_x_fw_s)
+
+            fld_x_bw_s = arr_store(fld, (1, 0, 0))
+            grad_x_bw_s = empty_store(shape3d, (1, 0, 0))
+            grad_x_bw(fld_x_bw_s, dxy, grad_x_bw_s)
+
+            fld_x_c_s = arr_store(fld, (1, 0, 0))
+            grad_x_c_s = empty_store(shape3d, (1, 0, 0))
+            grad_x_c(fld_x_c_s, dxy, grad_x_c_s)
+
+            grad_fld_x = np.empty(shape3d, DTYPE)
+            grad_fld_x[:2, :, :] = grad_x_fw_s.data[:2, :, :]
+            grad_fld_x[-2:, :, :] = grad_x_bw_s.data[-2:, :, :]
+            grad_fld_x[1:-1, :, :] = grad_x_c_s.data[1:-1, :, :]
+
+            return grad_fld_x
+
+        def grad_y(fld: npt.NDArray[np.float_], dy: float) -> npt.NDArray[np.float_]:
+            """Compute the gradient in y-direction."""
+
+            @gts.stencil(backend=BACKEND)
+            def grad_y_fw(
+                fld: gts.Field[gts.IJK, DTYPE],
+                dy: float,
+                grad_y: gts.Field[gts.IJK, DTYPE],
+            ) -> None:
+                """Compute forward horizontal gradient in y-direction."""
+                with computation(PARALLEL), interval(...):
+                    grad_y = (fld[0, 1, 0] - fld[0, 0, 0]) / dy
+
+            @gts.stencil(backend=BACKEND)
+            def grad_y_bw(
+                fld: gts.Field[gts.IJK, DTYPE],
+                dy: float,
+                grad_y: gts.Field[gts.IJK, DTYPE],
+            ) -> None:
+                """Compute backward horizontal gradient in y-direction."""
+                with computation(PARALLEL), interval(...):
+                    grad_y = (fld[0, 0, 0] - fld[0, -1, 0]) / dy
+
+            @gts.stencil(backend=BACKEND)
+            def grad_y_c(
+                fld: gts.Field[gts.IJK, DTYPE],
+                dy: float,
+                grad_y: gts.Field[gts.IJK, DTYPE],
+            ) -> None:
+                """Compute central horizontal gradient in y-direction."""
+                with computation(PARALLEL), interval(...):
+                    grad_y = (fld[0, 1, 0] - fld[0, -1, 0]) / (2 * dy)
+
+            kwargs = {"backend": BACKEND, "dtype": DTYPE}
+
+            fld_y_fw_s = arr_store(fld)
+            grad_y_fw_s = empty_store(shape3d, (0, 0, 0))
+            grad_y_fw(fld_y_fw_s, dxy, grad_y_fw_s)
+
+            fld_y_bw_s = arr_store(fld, (0, 1, 0))
+            grad_y_bw_s = empty_store(shape3d, (0, 1, 0))
+            grad_y_bw(fld_y_bw_s, dxy, grad_y_bw_s)
+
+            fld_y_c_s = arr_store(fld, (0, 1, 0))
+            grad_y_c_s = empty_store(shape3d, (0, 1, 0))
+            grad_y_c(fld_y_c_s, dxy, grad_y_c_s)
+
+            grad_fld_y = np.empty(shape3d, DTYPE)
+            grad_fld_y[:, :2, :] = grad_y_fw_s.data[:, :2, :]
+            grad_fld_y[:, -2:, :] = grad_y_bw_s.data[:, -2:, :]
+            grad_fld_y[:, 1:-1, :] = grad_y_c_s.data[:, 1:-1, :]
+
+            return grad_fld_y
 
         @gts.stencil(backend=BACKEND)
         def abs_grad(
@@ -339,45 +409,10 @@ def test_horiz_grad() -> None:
             with computation(PARALLEL), interval(...):
                 grad = sqrt(grad_x[0, 0, 0] ** 2 + grad_y[0, 0, 0] ** 2)
 
-        # grad_fld = np.empty(shape3d, DTYPE)
-        # grad_fld[:] = -1  # SR_DBG
-
-        grad_fld_x = np.empty(shape3d, DTYPE)
-        grad_fld_y = np.empty(shape3d, DTYPE)
+        grad_fld_x = grad_x(fld, dxy)
+        grad_fld_y = grad_y(fld, dxy)
 
         kwargs = {"backend": BACKEND, "dtype": DTYPE}
-
-        fld_x_fw_s = gt_store.from_array(fld, default_origin=(0, 0, 0), **kwargs)
-        grad_x_fw_s = gt_store.empty(shape=shape3d, default_origin=(0, 0, 0), **kwargs)
-        grad_x_fw(fld_x_fw_s, dxy, grad_x_fw_s)
-
-        fld_x_bw_s = gt_store.from_array(fld, default_origin=(1, 0, 0), **kwargs)
-        grad_x_bw_s = gt_store.empty(shape=shape3d, default_origin=(1, 0, 0), **kwargs)
-        grad_x_bw(fld_x_bw_s, dxy, grad_x_bw_s)
-
-        fld_x_c_s = gt_store.from_array(fld, default_origin=(1, 0, 0), **kwargs)
-        grad_x_c_s = gt_store.empty(shape=shape3d, default_origin=(1, 0, 0), **kwargs)
-        grad_x_c(fld_x_c_s, dxy, grad_x_c_s)
-
-        grad_fld_x[:2, :, :] = grad_x_fw_s.data[:2, :, :]
-        grad_fld_x[-2:, :, :] = grad_x_bw_s.data[-2:, :, :]
-        grad_fld_x[1:-1, :, :] = grad_x_c_s.data[1:-1, :, :]
-
-        fld_y_fw_s = gt_store.from_array(fld, default_origin=(0, 0, 0), **kwargs)
-        grad_y_fw_s = gt_store.empty(shape=shape3d, default_origin=(0, 0, 0), **kwargs)
-        grad_y_fw(fld_y_fw_s, dxy, grad_y_fw_s)
-
-        fld_y_bw_s = gt_store.from_array(fld, default_origin=(0, 1, 0), **kwargs)
-        grad_y_bw_s = gt_store.empty(shape=shape3d, default_origin=(0, 1, 0), **kwargs)
-        grad_y_bw(fld_y_bw_s, dxy, grad_y_bw_s)
-
-        fld_y_c_s = gt_store.from_array(fld, default_origin=(0, 1, 0), **kwargs)
-        grad_y_c_s = gt_store.empty(shape=shape3d, default_origin=(0, 1, 0), **kwargs)
-        grad_y_c(fld_y_c_s, dxy, grad_y_c_s)
-
-        grad_fld_y[:, :2, :] = grad_y_fw_s.data[:, :2, :]
-        grad_fld_y[:, -2:, :] = grad_y_bw_s.data[:, -2:, :]
-        grad_fld_y[:, 1:-1, :] = grad_y_c_s.data[:, 1:-1, :]
 
         grad_x_s = gt_store.from_array(grad_fld_x, default_origin=(0, 0, 0), **kwargs)
         grad_y_s = gt_store.from_array(grad_fld_y, default_origin=(0, 0, 0), **kwargs)
