@@ -1,18 +1,18 @@
 """Test some GT4Py stencils of increasing complexity."""
+# Standard library
+from typing import Any
 
 # Third-party
-import gt4py
 import gt4py.gtscript as gts
 import gt4py.storage as gt_store
 import numpy as np
 import numpy.typing as npt
 from gt4py.gtscript import BACKWARD
-from gt4py.gtscript import FORWARD
-from gt4py.gtscript import PARALLEL
 from gt4py.gtscript import computation
+from gt4py.gtscript import FORWARD
 from gt4py.gtscript import interval
+from gt4py.gtscript import PARALLEL
 from gt4py.gtscript import sqrt
-
 
 BACKEND = "gtc:numpy"
 DTYPE = np.float32
@@ -28,15 +28,15 @@ def test_copy() -> None:
     ) -> None:
         """Copy the input field to the output field."""
         with computation(PARALLEL), interval(...):
-            out_fld = in_fld[0, 0, 0]
+            out_fld[...] = in_fld[0, 0, 0]
 
     # Define fields
     (nx, ny, nz) = shape3d = (4, 5, 6)
-    in_data = np.zeros(shape3d, DTYPE)
+    in_data: npt.NDArray[np.float_] = np.zeros(shape3d, DTYPE)
     for i in range(nx):
         for k in range(nz):
             in_data[i, :, k] = i + k
-    out_data = np.zeros(in_data.shape, DTYPE)
+    out_data: npt.NDArray[np.float_] = np.zeros(in_data.shape, DTYPE)
 
     # Define stores
     in_store = gt_store.from_array(
@@ -67,19 +67,19 @@ def test_vertical_shift_periodic() -> None:
     ) -> None:
         """Shift field upward by one, moving the uppermost layer to the bottom."""
         with computation(FORWARD), interval(-1, None):
-            wk2d_fld = in_fld[0, 0, 0]
+            wk2d_fld[...] = in_fld[0, 0, 0]
         with computation(FORWARD), interval(0, 1):
-            out_fld = wk2d_fld[0, 0]
+            out_fld[...] = wk2d_fld[0, 0]
         with computation(FORWARD), interval(1, None):
-            out_fld = in_fld[0, 0, -1]
+            out_fld[...] = in_fld[0, 0, -1]
 
     # Define fields
     (nx, ny, nz) = shape3d = *shape2d, _ = (4, 5, 6)
-    in_data = np.zeros(shape3d, DTYPE)
+    in_data: npt.NDArray[np.float_] = np.zeros(shape3d, DTYPE)
     for i in range(nx):
         for k in range(nz):
             in_data[i, :, k] = i + k
-    out_data = np.zeros(shape3d, DTYPE)
+    out_data: npt.NDArray[np.float_] = np.zeros(shape3d, DTYPE)
 
     # Define stores
     in_store = gt_store.from_array(
@@ -93,7 +93,7 @@ def test_vertical_shift_periodic() -> None:
     )
 
     # Create test reference and make sure the output array doesn't validate yet
-    ref = np.dstack([in_data[:, :, -2:], in_data[:, :, :-2]])
+    ref: npt.NDArray[np.float_] = np.dstack([in_data[:, :, -2:], in_data[:, :, :-2]])
     assert not np.equal(in_store, ref).all()
 
     # Run test: Shift field upward twice
@@ -117,15 +117,15 @@ def test_vert_intp_nearest_neighbor() -> None:
     ) -> None:
         """Interpolate ``fld`` to ``val``-surface of ``grid``."""
         with computation(FORWARD), interval(-1, None):
-            intp = vnan
+            intp[...] = vnan
         with computation(FORWARD), interval(...):
             if grid == val:
-                intp = fld[0, 0, 0]
+                intp[...] = fld[0, 0, 0]
 
     # Define fields
     (nx, ny, nz) = shape3d = *shape2d, _ = (4, 5, 6)
-    grid_data = np.zeros(shape3d, DTYPE)
-    in_data = np.zeros(shape3d, DTYPE)
+    grid_data: npt.NDArray[np.float_] = np.zeros(shape3d, DTYPE)
+    in_data: npt.NDArray[np.float_] = np.zeros(shape3d, DTYPE)
     for k in range(nz):
         in_data[:, :, k] = k
         for i in range(nx):
@@ -174,32 +174,32 @@ def test_vert_intp_linear() -> None:
     ) -> None:
         """Interpolate ``fld`` to ``val``-surface of ``grid``."""
         with computation(FORWARD), interval(...):
-            wk_lower = vnan
-            d_lower = 0.0
+            wk_lower[...] = vnan
+            d_lower[...] = 0.0
         with computation(FORWARD), interval(...):
             if grid < val:
-                wk_lower = fld[0, 0, 0]
-                d_lower = val - grid[0, 0, 0]
+                wk_lower[...] = fld[0, 0, 0]
+                d_lower[...] = val - grid[0, 0, 0]
         with computation(BACKWARD), interval(...):
-            wk_upper = vnan
-            d_upper = 0.0
+            wk_upper[...] = vnan
+            d_upper[...] = 0.0
         with computation(BACKWARD), interval(...):
             if grid > val:
-                wk_upper = fld[0, 0, 0]
-                d_upper = grid[0, 0, 0] - val
+                wk_upper[...] = fld[0, 0, 0]
+                d_upper[...] = grid[0, 0, 0] - val
         with computation(FORWARD), interval(...):
             if wk_lower[0, 0] == vnan or wk_upper[0, 0] == vnan:
-                intp = vnan
+                intp[...] = vnan
             else:
-                intp = (
+                intp[...] = (
                     d_lower[0, 0] / (d_lower[0, 0] + d_upper[0, 0]) * wk_lower[0, 0]
                     + d_upper[0, 0] / (d_lower[0, 0] + d_upper[0, 0]) * wk_upper[0, 0]
                 )
 
     # Define fields
     (nx, ny, nz) = shape3d = *shape2d, _ = (4, 5, 6)
-    grid_data = np.zeros(shape3d, DTYPE)
-    fld_data = np.zeros(shape3d, DTYPE)
+    grid_data: npt.NDArray[np.float_] = np.zeros(shape3d, DTYPE)
+    fld_data: npt.NDArray[np.float_] = np.zeros(shape3d, DTYPE)
     for k in range(nz):
         fld_data[:, :, k] = k
         for i in range(nx):
@@ -207,8 +207,12 @@ def test_vert_intp_linear() -> None:
     val = 5.2
 
     # Define stores
-    kwargs3d = {"default_origin": (0, 0, 0), "dtype": DTYPE, "backend": BACKEND}
-    kwargs2d = {**kwargs3d, "default_origin": (0, 0), "mask": "IJ"}
+    kwargs3d: dict[str, Any] = {
+        "default_origin": (0, 0, 0),
+        "dtype": DTYPE,
+        "backend": BACKEND,
+    }
+    kwargs2d: dict[str, Any] = {**kwargs3d, "default_origin": (0, 0), "mask": "IJ"}
     in_store = gt_store.from_array(fld_data, **kwargs3d)
     grid_store = gt_store.from_array(grid_data, **kwargs3d)
     intp_store = gt_store.empty(shape=shape2d, **kwargs2d)
@@ -251,7 +255,7 @@ def test_vert_intp_linear() -> None:
     assert np.allclose(intp_store.data, ref, equal_nan=True)
 
 
-def test_gradient() -> None:
+def test_gradient() -> None:  # noqa: C901  # too complex
     """Compute the horizontal gradient of a 3D field."""
 
     def arr_store(
@@ -281,40 +285,40 @@ def test_gradient() -> None:
     def gradient(fld: npt.NDArray[np.float_], dxy: float) -> npt.NDArray[np.float_]:
         """Compute the horizontal gradient of a 3D field."""
 
-        def grad_x(fld: npt.NDArray[np.float_], dx: float) -> npt.NDArray[np.float_]:
+        def gradient_x(
+            fld: npt.NDArray[np.float_], dx: float
+        ) -> npt.NDArray[np.float_]:
             """Compute the gradient in x-direction."""
 
             @gts.stencil(backend=BACKEND)
             def grad_x_fw(
                 fld: gts.Field[gts.IJK, DTYPE],
                 dx: float,
-                grad_x: gts.Field[gts.IJK, DTYPE],
+                grad: gts.Field[gts.IJK, DTYPE],
             ) -> None:
                 """Compute forward horizontal gradient in x-direction."""
                 with computation(PARALLEL), interval(...):
-                    grad_x = (fld[1, 0, 0] - fld[0, 0, 0]) / dx
+                    grad[...] = (fld[1, 0, 0] - fld[0, 0, 0]) / dx
 
             @gts.stencil(backend=BACKEND)
             def grad_x_bw(
                 fld: gts.Field[gts.IJK, DTYPE],
                 dx: float,
-                grad_x: gts.Field[gts.IJK, DTYPE],
+                grad: gts.Field[gts.IJK, DTYPE],
             ) -> None:
                 """Compute backward horizontal gradient in x-direction."""
                 with computation(PARALLEL), interval(...):
-                    grad_x = (fld[0, 0, 0] - fld[-1, 0, 0]) / dx
+                    grad[...] = (fld[0, 0, 0] - fld[-1, 0, 0]) / dx
 
             @gts.stencil(backend=BACKEND)
             def grad_x_c(
                 fld: gts.Field[gts.IJK, DTYPE],
                 dx: float,
-                grad_x: gts.Field[gts.IJK, DTYPE],
+                grad: gts.Field[gts.IJK, DTYPE],
             ) -> None:
                 """Compute central horizontal gradient in x-direction."""
                 with computation(PARALLEL), interval(...):
-                    grad_x = (fld[1, 0, 0] - fld[-1, 0, 0]) / (2 * dx)
-
-            kwargs = {"backend": BACKEND, "dtype": DTYPE}
+                    grad[...] = (fld[1, 0, 0] - fld[-1, 0, 0]) / (2 * dx)
 
             fld_x_fw_s = arr_store(fld)
             grad_x_fw_s = empty_store(shape3d)
@@ -328,47 +332,47 @@ def test_gradient() -> None:
             grad_x_c_s = empty_store(shape3d, (1, 0, 0))
             grad_x_c(fld_x_c_s, dxy, grad_x_c_s)
 
-            grad_fld_x = np.empty(shape3d, DTYPE)
+            grad_fld_x: npt.NDArray[np.float_] = np.empty(shape3d, DTYPE)
             grad_fld_x[:2, :, :] = grad_x_fw_s.data[:2, :, :]
             grad_fld_x[-2:, :, :] = grad_x_bw_s.data[-2:, :, :]
             grad_fld_x[1:-1, :, :] = grad_x_c_s.data[1:-1, :, :]
 
             return grad_fld_x
 
-        def grad_y(fld: npt.NDArray[np.float_], dy: float) -> npt.NDArray[np.float_]:
+        def gradient_y(
+            fld: npt.NDArray[np.float_], dy: float
+        ) -> npt.NDArray[np.float_]:
             """Compute the gradient in y-direction."""
 
             @gts.stencil(backend=BACKEND)
             def grad_y_fw(
                 fld: gts.Field[gts.IJK, DTYPE],
                 dy: float,
-                grad_y: gts.Field[gts.IJK, DTYPE],
+                grad: gts.Field[gts.IJK, DTYPE],
             ) -> None:
                 """Compute forward horizontal gradient in y-direction."""
                 with computation(PARALLEL), interval(...):
-                    grad_y = (fld[0, 1, 0] - fld[0, 0, 0]) / dy
+                    grad[...] = (fld[0, 1, 0] - fld[0, 0, 0]) / dy
 
             @gts.stencil(backend=BACKEND)
             def grad_y_bw(
                 fld: gts.Field[gts.IJK, DTYPE],
                 dy: float,
-                grad_y: gts.Field[gts.IJK, DTYPE],
+                grad: gts.Field[gts.IJK, DTYPE],
             ) -> None:
                 """Compute backward horizontal gradient in y-direction."""
                 with computation(PARALLEL), interval(...):
-                    grad_y = (fld[0, 0, 0] - fld[0, -1, 0]) / dy
+                    grad[...] = (fld[0, 0, 0] - fld[0, -1, 0]) / dy
 
             @gts.stencil(backend=BACKEND)
             def grad_y_c(
                 fld: gts.Field[gts.IJK, DTYPE],
                 dy: float,
-                grad_y: gts.Field[gts.IJK, DTYPE],
+                grad: gts.Field[gts.IJK, DTYPE],
             ) -> None:
                 """Compute central horizontal gradient in y-direction."""
                 with computation(PARALLEL), interval(...):
-                    grad_y = (fld[0, 1, 0] - fld[0, -1, 0]) / (2 * dy)
-
-            kwargs = {"backend": BACKEND, "dtype": DTYPE}
+                    grad[...] = (fld[0, 1, 0] - fld[0, -1, 0]) / (2 * dy)
 
             fld_y_fw_s = arr_store(fld)
             grad_y_fw_s = empty_store(shape3d, (0, 0, 0))
@@ -382,7 +386,7 @@ def test_gradient() -> None:
             grad_y_c_s = empty_store(shape3d, (0, 1, 0))
             grad_y_c(fld_y_c_s, dxy, grad_y_c_s)
 
-            grad_fld_y = np.empty(shape3d, DTYPE)
+            grad_fld_y: npt.NDArray[np.float_] = np.empty(shape3d, DTYPE)
             grad_fld_y[:, :2, :] = grad_y_fw_s.data[:, :2, :]
             grad_fld_y[:, -2:, :] = grad_y_bw_s.data[:, -2:, :]
             grad_fld_y[:, 1:-1, :] = grad_y_c_s.data[:, 1:-1, :]
@@ -397,32 +401,30 @@ def test_gradient() -> None:
         ) -> None:
             """Compute absolute horizontal gradient from its components."""
             with computation(PARALLEL), interval(...):
-                grad = sqrt(grad_x[0, 0, 0] ** 2 + grad_y[0, 0, 0] ** 2)
+                grad[...] = sqrt(grad_x[0, 0, 0] ** 2 + grad_y[0, 0, 0] ** 2)
 
-        grad_fld_x = grad_x(fld, dxy)
-        grad_fld_y = grad_y(fld, dxy)
+        grad_fld_x = gradient_x(fld, dxy)
+        grad_fld_y = gradient_y(fld, dxy)
 
-        kwargs = {"backend": BACKEND, "dtype": DTYPE}
-
-        grad_x_s = gt_store.from_array(grad_fld_x, default_origin=(0, 0, 0), **kwargs)
-        grad_y_s = gt_store.from_array(grad_fld_y, default_origin=(0, 0, 0), **kwargs)
-        grad_s = gt_store.empty(shape=shape3d, default_origin=(0, 0, 0), **kwargs)
+        grad_x_s = arr_store(grad_fld_x)
+        grad_y_s = arr_store(grad_fld_y)
+        grad_s = empty_store(shape3d)
         abs_grad(grad_x_s, grad_y_s, grad_s)
 
-        return grad_s.data
+        return np.asarray(grad_s.data)
 
     # Define input field
     (nx, ny, nz) = shape3d = (4, 5, 2)
-    fld = np.empty(shape3d, DTYPE)
+    fld: npt.NDArray[np.float_] = np.empty(shape3d, DTYPE)
     for i in range(nx):
         for j in range(ny):
             for k in range(nz):
-                fld[i, j, k] = i + j ** 2 + k ** 3
+                fld[i, j, k] = i + j**2 + k**3
     dxy = 1.0
 
     # Compute reference gradient
     grad_x, grad_y, _ = np.gradient(fld)
-    ref = np.sqrt(grad_x ** 2 + grad_y ** 2)
+    ref = np.sqrt(grad_x**2 + grad_y**2)
 
     # Compute and validate gradient
     grad_fld = gradient(fld, dxy)
