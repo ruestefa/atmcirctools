@@ -1,4 +1,4 @@
-"""Test the basic functionality of GT4Py."""
+"""Test some GT4Py stencils of increasing complexity."""
 
 # Third-party
 import gt4py
@@ -104,13 +104,8 @@ def test_vertical_shift_periodic() -> None:
     assert np.equal(in_store, ref).all()
 
 
-def test_vert_intp_full() -> None:
-    """Interpolate a 3D field in the vertical to a given surface.
-
-    The surface value lies on the grid, making nearest neighbor interpolation
-    sufficient.
-
-    """
+def test_vert_intp_nearest_neighbor() -> None:
+    """Nearest-neighbor interpolation of a 3D field to a 2D surface."""
 
     @gts.stencil(backend=BACKEND)
     def interpolate(
@@ -162,13 +157,8 @@ def test_vert_intp_full() -> None:
     assert np.allclose(intp_store.data, ref, equal_nan=True)
 
 
-def test_vert_intp_between() -> None:
-    """Interpolate a 3D field in the vertical to a given surface.
-
-    The surface value lies between the grid, requiring interpolation between
-    vertical grid points.
-
-    """
+def test_vert_intp_linear() -> None:
+    """Linear interpolation of a 3D field to a 2D surface."""
 
     @gts.stencil(backend=BACKEND)
     def interpolate(
@@ -261,7 +251,7 @@ def test_vert_intp_between() -> None:
     assert np.allclose(intp_store.data, ref, equal_nan=True)
 
 
-def test_horiz_grad() -> None:
+def test_gradient() -> None:
     """Compute the horizontal gradient of a 3D field."""
 
     def arr_store(
