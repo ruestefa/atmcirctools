@@ -14,8 +14,6 @@ from gt4py.gtscript import interval
 
 BACKEND = "gtc:numpy"
 DTYPE = np.float32
-ORIGIN3D = (0, 0, 0)
-ORIGIN2D = (0, 0)
 
 
 def test_copy() -> None:
@@ -40,10 +38,10 @@ def test_copy() -> None:
 
     # Define stores
     in_store = gt_store.from_array(
-        in_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
+        in_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
     )
     out_store = gt_store.from_array(
-        out_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
+        out_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
     )
 
     # Make sure the fields differ
@@ -83,13 +81,13 @@ def test_vertical_shift_periodic() -> None:
 
     # Define stores
     in_store = gt_store.from_array(
-        in_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
+        in_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
     )
     wk2d_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
     out_store = gt_store.from_array(
-        out_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
+        out_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
     )
 
     # Create test reference and make sure the output array doesn't validate yet
@@ -139,13 +137,13 @@ def test_vert_intp_full() -> None:
 
     # Define stores
     in_store = gt_store.from_array(
-        in_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
+        in_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
     )
     grid_store = gt_store.from_array(
-        grid_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
+        grid_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
     )
     intp_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
 
     # Create test reference and ensure the output array doesn't validate yet
@@ -218,29 +216,29 @@ def test_vert_intp_between() -> None:
 
     # Define stores
     in_store = gt_store.from_array(
-        fld_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
+        fld_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
     )
     grid_store = gt_store.from_array(
-        grid_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
+        grid_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
     )
     intp_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
     wk1_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
     wk2_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
     wk3_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
     wk4_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
     )
 
     # Create test reference and ensure the output array doesn't validate yet
-    idcs_lower_k = (np.where(grid_data < val, 1, 0).sum(axis=2) - 1)
+    idcs_lower_k = np.where(grid_data < val, 1, 0).sum(axis=2) - 1
     idcs_upper_k = idcs_lower_k + 1
     idcs_lower = (*np.ogrid[:nx, :ny], idcs_lower_k.clip(max=nz - 1))
     idcs_upper = (*np.ogrid[:nx, :ny], idcs_upper_k.clip(max=nz - 1))
