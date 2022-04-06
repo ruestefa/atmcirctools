@@ -217,27 +217,15 @@ def test_vert_intp_between() -> None:
     val = 5.2
 
     # Define stores
-    in_store = gt_store.from_array(
-        fld_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
-    )
-    grid_store = gt_store.from_array(
-        grid_data, backend=BACKEND, default_origin=(0, 0, 0), dtype=DTYPE
-    )
-    intp_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
-    )
-    wk1_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
-    )
-    wk2_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
-    )
-    wk3_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
-    )
-    wk4_store = gt_store.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
-    )
+    kwargs3d = {"default_origin": (0, 0, 0), "dtype": DTYPE, "backend": BACKEND}
+    kwargs2d = {**kwargs3d, "default_origin": (0, 0), "mask": "IJ"}
+    in_store = gt_store.from_array(fld_data, **kwargs3d)
+    grid_store = gt_store.from_array(grid_data, **kwargs3d)
+    intp_store = gt_store.empty(shape=shape2d, **kwargs2d)
+    wk1_store = gt_store.empty(shape=shape2d, **kwargs2d)
+    wk2_store = gt_store.empty(shape=shape2d, **kwargs2d)
+    wk3_store = gt_store.empty(shape=shape2d, **kwargs2d)
+    wk4_store = gt_store.empty(shape=shape2d, **kwargs2d)
 
     # Create test reference and ensure the output array doesn't validate yet
     idcs_lower_k = np.where(grid_data < val, 1, 0).sum(axis=2) - 1
