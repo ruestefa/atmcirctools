@@ -3,6 +3,7 @@
 # Third-party
 import gt4py
 import gt4py.gtscript as gts
+import gt4py.storage as gt_store
 import numpy as np
 from gt4py.gtscript import BACKWARD
 from gt4py.gtscript import FORWARD
@@ -13,7 +14,8 @@ from gt4py.gtscript import interval
 
 BACKEND = "gtc:numpy"
 DTYPE = np.float32
-ORIGIN = (0, 0, 0)
+ORIGIN3D = (0, 0, 0)
+ORIGIN2D = (0, 0)
 
 
 def test_copy() -> None:
@@ -37,11 +39,11 @@ def test_copy() -> None:
     out_data = np.zeros(in_data.shape, DTYPE)
 
     # Define stores
-    in_store = gt4py.storage.from_array(
-        in_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
+    in_store = gt_store.from_array(
+        in_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
     )
-    out_store = gt4py.storage.from_array(
-        out_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
+    out_store = gt_store.from_array(
+        out_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
     )
 
     # Make sure the fields differ
@@ -80,14 +82,14 @@ def test_vertical_shift_periodic() -> None:
     out_data = np.zeros(shape3d, DTYPE)
 
     # Define stores
-    in_store = gt4py.storage.from_array(
-        in_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
+    in_store = gt_store.from_array(
+        in_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
     )
-    wk2d_store = gt4py.storage.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
+    wk2d_store = gt_store.empty(
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
     )
-    out_store = gt4py.storage.from_array(
-        out_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
+    out_store = gt_store.from_array(
+        out_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
     )
 
     # Create test reference and make sure the output array doesn't validate yet
@@ -136,14 +138,14 @@ def test_vert_intp_full() -> None:
     val = 6.0
 
     # Define stores
-    in_store = gt4py.storage.from_array(
-        in_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
+    in_store = gt_store.from_array(
+        in_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
     )
-    grid_store = gt4py.storage.from_array(
-        grid_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
+    grid_store = gt_store.from_array(
+        grid_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
     )
-    intp_store = gt4py.storage.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
+    intp_store = gt_store.empty(
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
     )
 
     # Create test reference and ensure the output array doesn't validate yet
@@ -215,26 +217,26 @@ def test_vert_intp_between() -> None:
     val = 5.2
 
     # Define stores
-    in_store = gt4py.storage.from_array(
-        fld_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
+    in_store = gt_store.from_array(
+        fld_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
     )
-    grid_store = gt4py.storage.from_array(
-        grid_data, backend=BACKEND, default_origin=ORIGIN, dtype=DTYPE
+    grid_store = gt_store.from_array(
+        grid_data, backend=BACKEND, default_origin=ORIGIN3D, dtype=DTYPE
     )
-    intp_store = gt4py.storage.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
+    intp_store = gt_store.empty(
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
     )
-    wk1_store = gt4py.storage.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
+    wk1_store = gt_store.empty(
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
     )
-    wk2_store = gt4py.storage.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
+    wk2_store = gt_store.empty(
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
     )
-    wk3_store = gt4py.storage.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
+    wk3_store = gt_store.empty(
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
     )
-    wk4_store = gt4py.storage.empty(
-        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=(0, 0), dtype=DTYPE
+    wk4_store = gt_store.empty(
+        shape=shape2d, mask="IJ", backend=BACKEND, default_origin=ORIGIN2D, dtype=DTYPE
     )
 
     # Create test reference and ensure the output array doesn't validate yet
