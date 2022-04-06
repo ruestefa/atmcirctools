@@ -112,17 +112,17 @@ def test_vert_intp_full() -> None:
 
     @gts.stencil(backend=BACKEND)
     def interpolate(
-        in_fld: gts.Field[gts.IJK, DTYPE],
-        grid_fld: gts.Field[gts.IJK, DTYPE],
+        fld: gts.Field[gts.IJK, DTYPE],
+        grid: gts.Field[gts.IJK, DTYPE],
         val: float,
-        intp_fld: gts.Field[gts.IJ, DTYPE],
+        intp: gts.Field[gts.IJ, DTYPE],
     ) -> None:
-        """Shift field upward by one, moving the uppermost layer to the bottom."""
+        """Interpolate ``fld`` to ``val``-surface of ``grid``."""
         with computation(FORWARD), interval(-1, None):
-            intp_fld = in_fld[0, 0, 0]
+            intp = fld[0, 0, 0]
         with computation(FORWARD), interval(...):
-            if grid_fld == val:
-                intp_fld = in_fld[0, 0, 0]
+            if grid == val:
+                intp = fld[0, 0, 0]
 
     # Define fields
     (nx, ny, nz) = shape3d = *shape2d, _ = (4, 5, 6)
