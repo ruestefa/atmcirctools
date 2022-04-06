@@ -147,12 +147,10 @@ def test_vert_intp_full() -> None:
     )
 
     # Create test reference and ensure the output array doesn't validate yet
-    idcs = np.where(grid_data < val, 1, 0).sum(axis=2)
-    ref = np.full(shape2d, np.nan, DTYPE)
-    for i in range(nx):
-        for j in range(ny):
-            if idcs[i, j] < nz:
-                ref[i, j] = in_data[i, j, idcs[i, j]]
+    idcs_k = np.where(grid_data < val, 1, 0).sum(axis=2)
+    idcs = (*np.ogrid[:nx, :ny], idcs_k.clip(max=nz - 1))
+    ref = in_data[idcs]
+    ref[idcs_k >= nz] = np.nan
     assert not np.equal(intp_store, ref).all()
 
     # Run test: Interpolate field to surface
@@ -241,26 +239,16 @@ def test_vert_intp_between() -> None:
     )
 
     # Create test reference and ensure the output array doesn't validate yet
-    idcs_lower = (np.where(grid_data < val, 1, 0).sum(axis=2) - 1)
-    idcs_upper = idcs_lower + 1
-    idcs_lower[idcs_lower > nz - 1] = -1
-    idcs_upper[idcs_upper > nz - 1] = -1
-    # grid_lower = np.take(grid_data, idcs_lower)
-    # grid_upper = np.take(grid_data, idcs_upper)
-    # ref_lower = np.take(fld_data, idcs_lower)
-    # ref_upper = np.take(fld_data, idcs_upper)
-    grid_lower = np.full(shape2d, np.nan, DTYPE)
-    grid_upper = np.full(shape2d, np.nan, DTYPE)
-    ref_lower = np.full(shape2d, np.nan, DTYPE)
-    ref_upper = np.full(shape2d, np.nan, DTYPE)
-    for i in range(nx):
-        for j in range(ny):
-            if idcs_lower[i, j] > 0:
-                grid_lower[i, j] = grid_data[i, j, idcs_lower[i, j]]
-                ref_lower[i, j] = fld_data[i, j, idcs_lower[i, j]]
-            if idcs_upper[i, j] > 0:
-                grid_upper[i, j] = grid_data[i, j, idcs_upper[i, j]]
-                ref_upper[i, j] = fld_data[i, j, idcs_upper[i, j]]
+    idcs_lower_k = (np.where(grid_data < val, 1, 0).sum(axis=2) - 1)
+    idcs_upper_k = idcs_lower_k + 1
+    idcs_lower = (*np.ogrid[:nx, :ny], idcs_lower_k.clip(max=nz - 1))
+    idcs_upper = (*np.ogrid[:nx, :ny], idcs_upper_k.clip(max=nz - 1))
+    grid_lower = grid_data[idcs_lower]
+    grid_upper = grid_data[idcs_upper]
+    ref_lower = fld_data[idcs_lower]
+    ref_upper = fld_data[idcs_upper]
+    ref_lower[idcs_lower_k >= nz] = np.nan
+    ref_upper[idcs_upper_k >= nz] = np.nan
     d_lower = val - grid_lower
     d_upper = grid_upper - val
     d_tot = d_lower + d_upper
