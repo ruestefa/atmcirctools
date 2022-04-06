@@ -34,7 +34,7 @@ repos:
     hooks:
     -   id: mypy
         args: []
-        additional_dependencies:
+        additional_dependencies: []
 # Uncomment to run conda locally, e.g., when developing a tool that is available
 # on anaconda in order to prevent pre-commit from installing the latest version
 # instead of testing the local code
