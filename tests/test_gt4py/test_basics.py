@@ -167,7 +167,6 @@ def test_vert_intp_between() -> None:
     vertical grid points.
 
     """
-    NAN = np.nan
 
     @gts.stencil(backend=BACKEND)
     def interpolate(
