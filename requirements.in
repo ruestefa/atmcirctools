@@ -1,0 +1,6 @@
+atmcirclib == 0.2.0
+# gt4py
+click
+h5netcdf
+numpy
+xarray
