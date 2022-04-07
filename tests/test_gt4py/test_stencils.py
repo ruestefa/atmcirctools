@@ -65,7 +65,7 @@ def test_vertical_shift_periodic() -> None:
         wk2d_fld: gts.Field[gts.IJ, DTYPE],
         out_fld: gts.Field[gts.IJK, DTYPE],
     ) -> None:
-        """Shift field upward by one, moving the uppermost layer to the bottom."""
+        """Shift field upward by one, moving the abovemost layer to the bottom."""
         with computation(FORWARD), interval(-1, None):
             wk2d_fld[...] = in_fld[0, 0, 0]
         with computation(FORWARD), interval(0, 1):
@@ -166,34 +166,34 @@ def test_vert_intp_linear() -> None:
         grid: gts.Field[gts.IJK, DTYPE],
         val: float,
         intp: gts.Field[gts.IJ, DTYPE],
-        wk_lower: gts.Field[gts.IJ, DTYPE],
-        wk_upper: gts.Field[gts.IJ, DTYPE],
-        d_lower: gts.Field[gts.IJ, DTYPE],
-        d_upper: gts.Field[gts.IJ, DTYPE],
+        wk_below: gts.Field[gts.IJ, DTYPE],
+        wk_above: gts.Field[gts.IJ, DTYPE],
+        d_below: gts.Field[gts.IJ, DTYPE],
+        d_above: gts.Field[gts.IJ, DTYPE],
         vnan: float,
     ) -> None:
         """Interpolate ``fld`` to ``val``-surface of ``grid``."""
         with computation(FORWARD), interval(...):
-            wk_lower[...] = vnan
-            d_lower[...] = 0.0
+            wk_below[...] = vnan
+            d_below[...] = 0.0
         with computation(FORWARD), interval(...):
             if grid < val:
-                wk_lower[...] = fld[0, 0, 0]
-                d_lower[...] = val - grid[0, 0, 0]
+                wk_below[...] = fld[0, 0, 0]
+                d_below[...] = val - grid[0, 0, 0]
         with computation(BACKWARD), interval(...):
-            wk_upper[...] = vnan
-            d_upper[...] = 0.0
+            wk_above[...] = vnan
+            d_above[...] = 0.0
         with computation(BACKWARD), interval(...):
             if grid > val:
-                wk_upper[...] = fld[0, 0, 0]
-                d_upper[...] = grid[0, 0, 0] - val
+                wk_above[...] = fld[0, 0, 0]
+                d_above[...] = grid[0, 0, 0] - val
         with computation(FORWARD), interval(...):
-            if wk_lower[0, 0] == vnan or wk_upper[0, 0] == vnan:
+            if wk_below[0, 0] == vnan or wk_above[0, 0] == vnan:
                 intp[...] = vnan
             else:
                 intp[...] = (
-                    d_lower[0, 0] / (d_lower[0, 0] + d_upper[0, 0]) * wk_lower[0, 0]
-                    + d_upper[0, 0] / (d_lower[0, 0] + d_upper[0, 0]) * wk_upper[0, 0]
+                    d_below[0, 0] / (d_below[0, 0] + d_above[0, 0]) * wk_below[0, 0]
+                    + d_above[0, 0] / (d_below[0, 0] + d_above[0, 0]) * wk_above[0, 0]
                 )
 
     # Define fields
@@ -222,20 +222,22 @@ def test_vert_intp_linear() -> None:
     wk4_store = gt_store.empty(shape=shape2d, **kwargs2d)
 
     # Create test reference and ensure the output array doesn't validate yet
-    idcs_lower_k = np.where(grid_data < val, 1, 0).sum(axis=2) - 1
-    idcs_upper_k = idcs_lower_k + 1
-    idcs_lower = (*np.ogrid[:nx, :ny], idcs_lower_k.clip(max=nz - 1))
-    idcs_upper = (*np.ogrid[:nx, :ny], idcs_upper_k.clip(max=nz - 1))
-    grid_lower = grid_data[idcs_lower]
-    grid_upper = grid_data[idcs_upper]
-    ref_lower = fld_data[idcs_lower]
-    ref_upper = fld_data[idcs_upper]
-    ref_lower[idcs_lower_k >= nz] = np.nan
-    ref_upper[idcs_upper_k >= nz] = np.nan
-    d_lower = val - grid_lower
-    d_upper = grid_upper - val
-    d_tot = d_lower + d_upper
-    ref = d_lower / d_tot * ref_lower + d_upper / d_tot * ref_upper
+    idcs_below_k = np.where(grid_data < val, 1, 0).sum(axis=2) - 1
+    idcs_above_k = idcs_below_k + 1
+    idcs_below = (*np.ogrid[:nx, :ny], idcs_below_k.clip(max=nz - 1))
+    idcs_above = (*np.ogrid[:nx, :ny], idcs_above_k.clip(max=nz - 1))
+    grid_below = grid_data[idcs_below]
+    grid_above = grid_data[idcs_above]
+    ref_below = fld_data[idcs_below]
+    ref_above = fld_data[idcs_above]
+    ref_below[idcs_below_k < 0] = np.nan
+    ref_above[idcs_above_k < 0] = np.nan
+    ref_below[idcs_below_k >= nz] = np.nan
+    ref_above[idcs_above_k >= nz] = np.nan
+    d_below = val - grid_below
+    d_above = grid_above - val
+    d_tot = d_below + d_above
+    ref = d_below / d_tot * ref_below + d_above / d_tot * ref_above
     assert not np.equal(intp_store, ref).all()
 
     # Run test: Interpolate field to surface
