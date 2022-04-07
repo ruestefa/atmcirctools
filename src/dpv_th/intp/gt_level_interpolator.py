@@ -91,6 +91,7 @@ class LevelInterpolator:
 
     def to_level(self, fld: npt.ArrayLike, lvl: float) -> npt.NDArray[np.float_]:
         """Interpolate to a single level."""
+        lvl = float(lvl)  # gt4py doesn't accept ints in place of floats
         dtype_in = fld.dtype if isinstance(fld, np.ndarray) else self.dtype
         fld = np.asarray(fld, self.dtype)
         DTYPE = self.dtype
