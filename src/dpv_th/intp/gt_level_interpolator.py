@@ -60,7 +60,7 @@ class LevelInterpolator:
         *,
         direction: Optional[InterpolationDirectionLike_T] = None,
         dtype: npt.DTypeLike = np.float32,
-        gt_backend: str = "gtc:numpy"
+        gt_backend: str = "gtc:numpy",
     ) -> None:
         """Create a new instance.
 
@@ -94,46 +94,47 @@ class LevelInterpolator:
         """Interpolate to a single level."""
         dtype_in = fld.dtype if isinstance(fld, np.ndarray) else self.dtype
         fld = np.asarray(fld, self.dtype)
-        grid = self.grid[:, :, ::-1] if str(self.direction) == "down" else self.grid
         DTYPE = self.dtype
 
         @gts.stencil(backend=self.gt_backend)
-        def to_level(
+        def intp_up(
             fld: gts.Field[gts.IJK, DTYPE],
             grid: gts.Field[gts.IJK, DTYPE],
             lvl: float,
             intp: gts.Field[gts.IJ, DTYPE],
-            fld_below: gts.Field[gts.IJ, DTYPE],
-            fld_above: gts.Field[gts.IJ, DTYPE],
-            d_below: gts.Field[gts.IJ, DTYPE],
-            d_above: gts.Field[gts.IJ, DTYPE],
             vnan: float,
         ) -> None:
-            """Interpolate ``fld`` to ``val``-surface of ``grid``."""
+            """Perform interpolation upward."""
             with computation(FORWARD), interval(...):
-                fld_below[...] = vnan
-                d_below[...] = 0.0
+                intp[...] = vnan
             with computation(FORWARD), interval(...):
-                if grid < lvl:
-                    fld_below[...] = fld[0, 0, 0]
-                    d_below[...] = lvl - grid[0, 0, 0]
+                if (grid[0, 0, 0] <= lvl and grid[0, 0, 1] >= lvl) or (
+                    grid[0, 0, 0] >= lvl and grid[0, 0, 1] <= lvl
+                ):
+                    if isnan(intp[0, 0]) or intp[0, 0] == vnan:
+                        intp[...] = fld[0, 0, 0] + (lvl - grid[0, 0, 0]) / (
+                            grid[0, 0, 1] - grid[0, 0, 0]
+                        ) * (fld[0, 0, 1] - fld[0, 0, 0])
+
+        @gts.stencil(backend=self.gt_backend)
+        def intp_down(
+            fld: gts.Field[gts.IJK, DTYPE],
+            grid: gts.Field[gts.IJK, DTYPE],
+            lvl: float,
+            intp: gts.Field[gts.IJ, DTYPE],
+            vnan: float,
+        ) -> None:
+            """Perform interpolation downward."""
             with computation(BACKWARD), interval(...):
-                fld_above[...] = vnan
-                d_above[...] = 0.0
+                intp[...] = vnan
             with computation(BACKWARD), interval(...):
-                if grid > lvl:
-                    fld_above[...] = fld[0, 0, 0]
-                    d_above[...] = grid[0, 0, 0] - lvl
-            with computation(FORWARD), interval(...):
-                if (
-                    isnan(vnan)
-                    and (isnan(fld_below[0, 0]) == vnan or isnan(fld_above[0, 0]))
-                ) or (fld_below[0, 0] == vnan or fld_above[0, 0] == vnan):
-                    intp[...] = vnan
-                else:
-                    intp[...] = fld_below[0, 0] + d_below[0, 0] / (
-                        d_below[0, 0] + d_above[0, 0]
-                    )
+                if (grid[0, 0, 0] <= lvl and grid[0, 0, 1] >= lvl) or (
+                    grid[0, 0, 0] >= lvl and grid[0, 0, 1] <= lvl
+                ):
+                    if isnan(intp[0, 0]) or intp[0, 0] == vnan:
+                        intp[...] = fld[0, 0, 0] + (lvl - grid[0, 0, 0]) / (
+                            grid[0, 0, 1] - grid[0, 0, 0]
+                        ) * (fld[0, 0, 1] - fld[0, 0, 0])
 
         # Define stores
         kwargs3d: dict[str, Any] = {
@@ -148,24 +149,15 @@ class LevelInterpolator:
         }
         shape2d = fld.shape[:2]
         fld_store = gt_store.from_array(fld, **kwargs3d)
-        grid_store = gt_store.from_array(grid, **kwargs3d)
+        grid_store = gt_store.from_array(self.grid, **kwargs3d)
         intp_store = gt_store.empty(shape=shape2d, **kwargs2d)
-        wk_fld_below_store = gt_store.empty(shape=shape2d, **kwargs2d)
-        wk_fld_above_store = gt_store.empty(shape=shape2d, **kwargs2d)
-        wk_d_below_store = gt_store.empty(shape=shape2d, **kwargs2d)
-        wk_d_above_store = gt_store.empty(shape=shape2d, **kwargs2d)
 
-        to_level(
-            fld_store,
-            grid_store,
-            lvl,
-            intp_store,
-            wk_fld_below_store,
-            wk_fld_above_store,
-            wk_d_below_store,
-            wk_d_above_store,
-            np.nan,
-        )
+        if self.direction == "up":
+            intp_up(fld_store, grid_store, lvl, intp_store, np.nan)
+        elif self.direction == "down":
+            intp_down(fld_store, grid_store, lvl, intp_store, np.nan)
+        else:
+            raise ValueError(f"invalid direction '{self.direction}'")
 
         return np.asarray(intp_store.data, dtype_in)
 

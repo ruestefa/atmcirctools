@@ -6,6 +6,7 @@ from typing import cast
 # Third-party
 import numpy as np
 import numpy.typing as npt
+import pytest
 
 # First-party
 from dpv_th.intp import LevelInterpolator
@@ -86,13 +87,83 @@ class Test_MonoGrid:
     def test_decrease(self) -> None:
         """Invert the grid in z so it monotonically decreases."""
         grid, fld = self.init_grid_fld()
+        grid = grid[:, :, ::-1]
         lvl = 3.8
         ref = self.init_ref(grid, fld, lvl)
         assert np.isnan(ref).any()
-        grid = grid[:, :, ::-1]
         intp = LevelInterpolator(grid)
         intp_fld = intp.to_level(fld, lvl)
         assert np.allclose(intp_fld, ref, equal_nan=True)
 
 
-# TODO Test with fields that don't monotonically increase/decrease
+class Test_NonMonoGrid:
+    """Test with idealized grid that doesn't monotonically in-/decrease in z."""
+
+    nx: int = 4
+    ny: int = 4
+    nz: int = 6
+    shape2d: tuple[int, int] = (nx, ny)
+    shape3d: tuple[int, int, int] = (nx, ny, nz)
+
+    def init_grid_fld(self) -> tuple[npt.NDArray[np.float_], npt.NDArray[np.float_]]:
+        """Initialize grid and field arrays.
+
+        The grid mostly increases monotonically in z, but some columns feature
+        local stagnation or decreases.
+
+        """
+        grid: npt.NDArray[np.float_] = np.zeros(self.shape3d, np.float32)
+        fld: npt.NDArray[np.float_] = np.zeros(self.shape3d, np.float32)
+        grid[:, 0] = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        grid[:, 3] = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        grid[0, :] = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        grid[3, :] = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        grid[1, 1] = [1.2, 2.8, 2.8, 3.6, 4.5, 5.5]
+        grid[1, 2] = [1.5, 3.0, 2.8, 3.8, 3.0, 5.0]
+        grid[2, 1] = [1.0, 2.5, 3.9, 3.0, 5.0, 6.0]
+        grid[2, 2] = [2.0, 1.5, 3.0, 2.5, 4.6, 6.0]
+        grid[2, 3] = [2.0, 1.5, 3.0, 2.5, 4.6, 6.0]
+        fld[:, :] = np.arange(self.nz) + 1.0
+        return (grid, fld)
+
+    def test_no_direction_fails(self) -> None:
+        """Initialization fails without a specified direction."""
+        grid, _ = self.init_grid_fld()
+        with pytest.raises(ValueError):
+            LevelInterpolator(grid)
+
+    def test_up(self) -> None:
+        """Perform upward interpolation."""
+        grid, fld = self.init_grid_fld()
+        lvl = 3.2
+        ref: npt.NDArray[np.float_] = np.zeros(self.shape2d, np.float32)
+        ref[:, 0] = 3.2
+        ref[:, 3] = 3.2
+        ref[0, :] = 3.2
+        ref[3, :] = 3.2
+        ref[1, 1] = 3.5
+        ref[1, 2] = 3.4
+        ref[2, 1] = 2.5
+        ref[2, 2] = 4.0 + 1 / 3
+        ref[2, 3] = 4.0 + 1 / 3
+        intp = LevelInterpolator(grid, direction="up")
+        intp_fld = intp.to_level(fld, lvl)
+        assert np.allclose(intp_fld, ref, equal_nan=True)
+
+    def test_down(self) -> None:
+        """Perform upward interpolation."""
+        grid, fld = self.init_grid_fld()
+        lvl = 3.2
+        ref: npt.NDArray[np.float_] = np.zeros(self.shape2d, np.float32)
+        ref[:, 0] = 3.2
+        ref[:, 3] = 3.2
+        ref[0, :] = 3.2
+        ref[3, :] = 3.2
+        ref[1, 1] = 3.5
+        ref[1, 2] = 5.1
+        ref[2, 1] = 4.1
+        ref[2, 2] = 4.0 + 1 / 3
+        ref[2, 3] = 4.0 + 1 / 3
+        intp = LevelInterpolator(grid, direction="down")
+        intp_fld = intp.to_level(fld, lvl)
+        assert np.allclose(intp_fld, ref, equal_nan=True)
