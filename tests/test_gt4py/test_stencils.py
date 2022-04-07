@@ -11,6 +11,7 @@ from gt4py.gtscript import BACKWARD
 from gt4py.gtscript import computation
 from gt4py.gtscript import FORWARD
 from gt4py.gtscript import interval
+from gt4py.gtscript import isnan
 from gt4py.gtscript import PARALLEL
 from gt4py.gtscript import sqrt
 
@@ -188,7 +189,9 @@ def test_vert_intp_linear() -> None:
                 wk_above[...] = fld[0, 0, 0]
                 d_above[...] = grid[0, 0, 0] - val
         with computation(FORWARD), interval(...):
-            if wk_below[0, 0] == vnan or wk_above[0, 0] == vnan:
+            if (
+                isnan(vnan) and (isnan(wk_below[0, 0]) == vnan or isnan(wk_above[0, 0]))
+            ) or (wk_below[0, 0] == vnan or wk_above[0, 0] == vnan):
                 intp[...] = vnan
             else:
                 intp[...] = (

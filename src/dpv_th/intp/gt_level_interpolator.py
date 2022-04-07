@@ -19,6 +19,7 @@ from gt4py.gtscript import BACKWARD
 from gt4py.gtscript import computation
 from gt4py.gtscript import FORWARD
 from gt4py.gtscript import interval
+from gt4py.gtscript import isnan
 
 # from gt4py.gtscript import PARALLEL
 # from gt4py.gtscript import sqrt
@@ -124,7 +125,10 @@ class LevelInterpolator:
                     wk_upper[...] = fld[0, 0, 0]
                     d_upper[...] = grid[0, 0, 0] - val
             with computation(FORWARD), interval(...):
-                if wk_lower[0, 0] == vnan or wk_upper[0, 0] == vnan:
+                if (
+                    isnan(vnan)
+                    and (isnan(wk_lower[0, 0]) == vnan or isnan(wk_upper[0, 0]))
+                ) or (wk_lower[0, 0] == vnan or wk_upper[0, 0] == vnan):
                     intp[...] = vnan
                 else:
                     intp[...] = (
