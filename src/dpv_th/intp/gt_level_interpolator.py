@@ -5,7 +5,10 @@ This module uses gt4py, hence no ``from __future__ import annotations``.
 """
 
 # Standard library
+from enum import Enum
 from typing import Any
+from typing import Optional
+from typing import Union
 
 # Third-party
 import gt4py.gtscript as gts
@@ -21,6 +24,32 @@ from gt4py.gtscript import interval
 # from gt4py.gtscript import sqrt
 
 
+class StrEnum(str, Enum):
+    """Enum that compares with string values."""
+
+    def __str__(self) -> str:
+        """Return value as string."""
+        return str(self.value)
+
+
+class InterpolationDirection(StrEnum):
+    """Direction in which vertical interpolation is conducted."""
+
+    up = "up"
+    down = "down"
+
+
+InterpolationDirectionLike_T = Union[InterpolationDirection, str]
+
+
+class LevelInterpolatorError(Exception):
+    """Base exception for error during level interpolation."""
+
+
+class NonMonotonicGridError(LevelInterpolatorError):
+    """Grid is not monotonically in-/decreasing in z."""
+
+
 class LevelInterpolator:
     """Interpolate 3D fields to 2D surfaces at given levels."""
 
@@ -28,6 +57,7 @@ class LevelInterpolator:
         self,
         grid: npt.ArrayLike,
         *,
+        direction: Optional[InterpolationDirectionLike_T] = None,
         dtype: npt.DTypeLike = np.float32,
         gt_backend: str = "gtc:numpy"
     ) -> None:
@@ -37,12 +67,25 @@ class LevelInterpolator:
             grid: 3D grid array, ideally with monotonically increasing or
                 decreasing values.
 
+            direction (optional): Direction in which vertical interpolation
+                is conducted; typically 'forward'/'backward' for monotonically
+                in-/decreasing grids in z.
+
             dtype (optional): Data type used internally during computations.
 
             gt_backend (optional): Backend used by GT4Py.
 
         """
         self.grid: npt.NDArray[np.float_] = np.asarray(grid, dtype)
+        if direction is None:
+            try:
+                direction = self._derive_direction()
+            except NonMonotonicGridError as e:
+                raise ValueError(
+                    "must specify direction for grid that is not non-monotonically"
+                    " in-/decreasing grid in z"
+                ) from e
+        self.direction: InterpolationDirection = InterpolationDirection(direction)
         self.dtype: npt.DTypeLike = dtype
         self.gt_backend: str = gt_backend
 
@@ -50,6 +93,7 @@ class LevelInterpolator:
         """Interpolate to a single level."""
         dtype_in = fld.dtype if isinstance(fld, np.ndarray) else self.dtype
         fld = np.asarray(fld, self.dtype)
+        grid = self.grid[:, :, ::-1] if str(self.direction) == "down" else self.grid
         DTYPE = self.dtype
 
         @gts.stencil(backend=self.gt_backend)
@@ -103,7 +147,7 @@ class LevelInterpolator:
         }
         shape2d = fld.shape[:2]
         in_store = gt_store.from_array(fld, **kwargs3d)
-        grid_store = gt_store.from_array(self.grid, **kwargs3d)
+        grid_store = gt_store.from_array(grid, **kwargs3d)
         intp_store = gt_store.empty(shape=shape2d, **kwargs2d)
         wk1_store = gt_store.empty(shape=shape2d, **kwargs2d)
         wk2_store = gt_store.empty(shape=shape2d, **kwargs2d)
@@ -123,3 +167,15 @@ class LevelInterpolator:
         )
 
         return np.asarray(intp_store.data, dtype_in)
+
+    def _derive_direction(self) -> InterpolationDirection:
+        """Derive interpol. direction from monotonically in-/decreasing grid."""
+        deltas = self.grid[:, :, 1:] - self.grid[:, :, :-1]
+        if (deltas > 0).all():
+            return InterpolationDirection.up
+        elif (deltas < 0).all():
+            return InterpolationDirection.down
+        else:
+            raise NonMonotonicGridError(
+                "cannot derive direction from non-monotonic grid in z"
+            )

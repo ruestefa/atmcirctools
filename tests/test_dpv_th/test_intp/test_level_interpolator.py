@@ -11,8 +11,8 @@ import numpy.typing as npt
 from dpv_th.intp import LevelInterpolator
 
 
-class Test_Simple:
-    """Test with simple idealized field that monotonically increases in z."""
+class Test_MonoGrid:
+    """Test with simple idealized grid that monotonically increases in z."""
 
     nx: int = 7
     ny: int = 8
@@ -79,6 +79,17 @@ class Test_Simple:
         lvl = 9.7
         ref = self.init_ref(grid, fld, lvl)
         assert np.isnan(ref).any()
+        intp = LevelInterpolator(grid)
+        intp_fld = intp.to_level(fld, lvl)
+        assert np.allclose(intp_fld, ref, equal_nan=True)
+
+    def test_decrease(self) -> None:
+        """Invert the grid in z so it monotonically decreases."""
+        grid, fld = self.init_grid_fld()
+        lvl = 3.8
+        ref = self.init_ref(grid, fld, lvl)
+        assert np.isnan(ref).any()
+        grid = grid[:, :, ::-1]
         intp = LevelInterpolator(grid)
         intp_fld = intp.to_level(fld, lvl)
         assert np.allclose(intp_fld, ref, equal_nan=True)
