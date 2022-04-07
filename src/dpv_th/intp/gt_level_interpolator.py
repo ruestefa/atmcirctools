@@ -101,41 +101,38 @@ class LevelInterpolator:
         def to_level(
             fld: gts.Field[gts.IJK, DTYPE],
             grid: gts.Field[gts.IJK, DTYPE],
-            val: float,
+            lvl: float,
             intp: gts.Field[gts.IJ, DTYPE],
-            wk_lower: gts.Field[gts.IJ, DTYPE],
-            wk_upper: gts.Field[gts.IJ, DTYPE],
-            d_lower: gts.Field[gts.IJ, DTYPE],
-            d_upper: gts.Field[gts.IJ, DTYPE],
+            fld_below: gts.Field[gts.IJ, DTYPE],
+            fld_above: gts.Field[gts.IJ, DTYPE],
+            d_below: gts.Field[gts.IJ, DTYPE],
+            d_above: gts.Field[gts.IJ, DTYPE],
             vnan: float,
         ) -> None:
             """Interpolate ``fld`` to ``val``-surface of ``grid``."""
             with computation(FORWARD), interval(...):
-                wk_lower[...] = vnan
-                d_lower[...] = 0.0
+                fld_below[...] = vnan
+                d_below[...] = 0.0
             with computation(FORWARD), interval(...):
-                if grid < val:
-                    wk_lower[...] = fld[0, 0, 0]
-                    d_lower[...] = val - grid[0, 0, 0]
+                if grid < lvl:
+                    fld_below[...] = fld[0, 0, 0]
+                    d_below[...] = lvl - grid[0, 0, 0]
             with computation(BACKWARD), interval(...):
-                wk_upper[...] = vnan
-                d_upper[...] = 0.0
+                fld_above[...] = vnan
+                d_above[...] = 0.0
             with computation(BACKWARD), interval(...):
-                if grid > val:
-                    wk_upper[...] = fld[0, 0, 0]
-                    d_upper[...] = grid[0, 0, 0] - val
+                if grid > lvl:
+                    fld_above[...] = fld[0, 0, 0]
+                    d_above[...] = grid[0, 0, 0] - lvl
             with computation(FORWARD), interval(...):
                 if (
                     isnan(vnan)
-                    and (isnan(wk_lower[0, 0]) == vnan or isnan(wk_upper[0, 0]))
-                ) or (wk_lower[0, 0] == vnan or wk_upper[0, 0] == vnan):
+                    and (isnan(fld_below[0, 0]) == vnan or isnan(fld_above[0, 0]))
+                ) or (fld_below[0, 0] == vnan or fld_above[0, 0] == vnan):
                     intp[...] = vnan
                 else:
-                    intp[...] = (
-                        d_lower[0, 0] / (d_lower[0, 0] + d_upper[0, 0]) * wk_lower[0, 0]
-                        + d_upper[0, 0]
-                        / (d_lower[0, 0] + d_upper[0, 0])
-                        * wk_upper[0, 0]
+                    intp[...] = fld_below[0, 0] + d_below[0, 0] / (
+                        d_below[0, 0] + d_above[0, 0]
                     )
 
         # Define stores
@@ -150,23 +147,23 @@ class LevelInterpolator:
             "mask": "IJ",
         }
         shape2d = fld.shape[:2]
-        in_store = gt_store.from_array(fld, **kwargs3d)
+        fld_store = gt_store.from_array(fld, **kwargs3d)
         grid_store = gt_store.from_array(grid, **kwargs3d)
         intp_store = gt_store.empty(shape=shape2d, **kwargs2d)
-        wk1_store = gt_store.empty(shape=shape2d, **kwargs2d)
-        wk2_store = gt_store.empty(shape=shape2d, **kwargs2d)
-        wk3_store = gt_store.empty(shape=shape2d, **kwargs2d)
-        wk4_store = gt_store.empty(shape=shape2d, **kwargs2d)
+        wk_fld_below_store = gt_store.empty(shape=shape2d, **kwargs2d)
+        wk_fld_above_store = gt_store.empty(shape=shape2d, **kwargs2d)
+        wk_d_below_store = gt_store.empty(shape=shape2d, **kwargs2d)
+        wk_d_above_store = gt_store.empty(shape=shape2d, **kwargs2d)
 
         to_level(
-            in_store,
+            fld_store,
             grid_store,
             lvl,
             intp_store,
-            wk1_store,
-            wk2_store,
-            wk3_store,
-            wk4_store,
+            wk_fld_below_store,
+            wk_fld_above_store,
+            wk_d_below_store,
+            wk_d_above_store,
             np.nan,
         )
 

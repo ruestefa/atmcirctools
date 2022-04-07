@@ -195,8 +195,8 @@ def test_vert_intp_linear() -> None:
                 intp[...] = vnan
             else:
                 intp[...] = (
-                    d_below[0, 0] / (d_below[0, 0] + d_above[0, 0]) * wk_below[0, 0]
-                    + d_above[0, 0] / (d_below[0, 0] + d_above[0, 0]) * wk_above[0, 0]
+                    d_above[0, 0] / (d_below[0, 0] + d_above[0, 0]) * wk_below[0, 0]
+                    + d_below[0, 0] / (d_below[0, 0] + d_above[0, 0]) * wk_above[0, 0]
                 )
 
     # Define fields
@@ -240,7 +240,7 @@ def test_vert_intp_linear() -> None:
     d_below = val - grid_below
     d_above = grid_above - val
     d_tot = d_below + d_above
-    ref = d_below / d_tot * ref_below + d_above / d_tot * ref_above
+    ref = d_above / d_tot * ref_below + d_below / d_tot * ref_above
     assert not np.equal(intp_store, ref).all()
 
     # Run test: Interpolate field to surface

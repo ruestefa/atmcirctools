@@ -50,10 +50,10 @@ class Test_MonoGrid:
         d_below = lvl - grid_below
         d_above = grid_above - lvl
         d_tot = d_below + d_above
-        intp = d_below / d_tot * fld_below + d_above / d_tot * fld_above
+        intp = d_above / d_tot * fld_below + d_below / d_tot * fld_above
         return cast(npt.NDArray[np.float_], intp)
 
-    def test_intermediate_level(self) -> None:
+    def test_intermed_level(self) -> None:
         """Interpolate to an intermediate level with no NaNs."""
         grid, fld = self.init_grid_fld()
         lvl = 6.6
