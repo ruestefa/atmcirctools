@@ -96,8 +96,17 @@ class LevelInterpolator:
         fld = np.asarray(fld, self.dtype)
         DTYPE = self.dtype
 
+        @gts.function
+        def gtf_intp_point(fld: gts.Field, grid: gts.Field, lvl: float) -> gts.Field:
+            """Compute offset from lower level by interpolation."""
+            return fld[0, 0, 0] + (
+                (lvl - grid[0, 0, 0])
+                / (grid[0, 0, 1] - grid[0, 0, 0])
+                * (fld[0, 0, 1] - fld[0, 0, 0])
+            )
+
         @gts.stencil(backend=self.gt_backend)
-        def intp_up(
+        def gts_intp_up(
             fld: gts.Field[gts.IJK, DTYPE],
             grid: gts.Field[gts.IJK, DTYPE],
             lvl: float,
@@ -112,12 +121,13 @@ class LevelInterpolator:
                     grid[0, 0, 0] >= lvl and grid[0, 0, 1] <= lvl
                 ):
                     if isnan(intp[0, 0]) or intp[0, 0] == vnan:
-                        intp[...] = fld[0, 0, 0] + (lvl - grid[0, 0, 0]) / (
-                            grid[0, 0, 1] - grid[0, 0, 0]
-                        ) * (fld[0, 0, 1] - fld[0, 0, 0])
+                        # Note: As of 2022-04-07, assigning the resulf of the
+                        # function call directly to intp triggers an error in
+                        # `gtscript_frontend.py`, thus the addition of 0.0.
+                        intp[...] = 0.0 + gtf_intp_point(fld, grid, lvl)
 
         @gts.stencil(backend=self.gt_backend)
-        def intp_down(
+        def gts_intp_down(
             fld: gts.Field[gts.IJK, DTYPE],
             grid: gts.Field[gts.IJK, DTYPE],
             lvl: float,
@@ -132,9 +142,10 @@ class LevelInterpolator:
                     grid[0, 0, 0] >= lvl and grid[0, 0, 1] <= lvl
                 ):
                     if isnan(intp[0, 0]) or intp[0, 0] == vnan:
-                        intp[...] = fld[0, 0, 0] + (lvl - grid[0, 0, 0]) / (
-                            grid[0, 0, 1] - grid[0, 0, 0]
-                        ) * (fld[0, 0, 1] - fld[0, 0, 0])
+                        # Note: As of 2022-04-07, assigning the resulf of the
+                        # function call directly to intp triggers an error in
+                        # `gtscript_frontend.py`, thus the addition of 0.0.
+                        intp[...] = 0.0 + gtf_intp_point(fld, grid, lvl)
 
         # Define stores
         kwargs3d: dict[str, Any] = {
@@ -153,9 +164,9 @@ class LevelInterpolator:
         intp_store = gt_store.empty(shape=shape2d, **kwargs2d)
 
         if self.direction == "up":
-            intp_up(fld_store, grid_store, lvl, intp_store, np.nan)
+            gts_intp_up(fld_store, grid_store, lvl, intp_store, np.nan)
         elif self.direction == "down":
-            intp_down(fld_store, grid_store, lvl, intp_store, np.nan)
+            gts_intp_down(fld_store, grid_store, lvl, intp_store, np.nan)
         else:
             raise ValueError(f"invalid direction '{self.direction}'")
 
