@@ -6,7 +6,6 @@ This module uses gt4py, hence no ``from __future__ import annotations``.
 
 # Standard library
 from enum import Enum
-from typing import Any
 from typing import Optional
 from typing import Union
 
@@ -97,8 +96,10 @@ class LevelInterpolator:
         DTYPE = self.dtype
 
         @gts.function
-        def gtf_intp_point(fld: gts.Field, grid: gts.Field, lvl: float) -> gts.Field:
-            """Compute offset from lower level by interpolation."""
+        def gtf_intp_point(
+            fld: gts.Field[gts.IJK, DTYPE], grid: gts.Field[gts.IJK, DTYPE], lvl: float
+        ) -> gts.Field[gts.IJK, DTYPE]:
+            """Perform interpolation of a point between two levels."""
             return fld[0, 0, 0] + (
                 (lvl - grid[0, 0, 0])
                 / (grid[0, 0, 1] - grid[0, 0, 0])
@@ -148,20 +149,26 @@ class LevelInterpolator:
                         intp[...] = 0.0 + gtf_intp_point(fld, grid, lvl)
 
         # Define stores
-        kwargs3d: dict[str, Any] = {
-            "default_origin": (0, 0, 0),
-            "dtype": self.dtype,
-            "backend": self.gt_backend,
-        }
-        kwargs2d: dict[str, Any] = {
-            **kwargs3d,
-            "default_origin": (0, 0),
-            "mask": "IJ",
-        }
         shape2d = fld.shape[:2]
-        fld_store = gt_store.from_array(fld, **kwargs3d)
-        grid_store = gt_store.from_array(self.grid, **kwargs3d)
-        intp_store = gt_store.empty(shape=shape2d, **kwargs2d)
+        fld_store = gt_store.from_array(
+            fld,
+            default_origin=(0, 0, 0),
+            dtype=self.dtype,
+            backend=self.gt_backend,
+        )
+        grid_store = gt_store.from_array(
+            self.grid,
+            default_origin=(0, 0, 0),
+            dtype=self.dtype,
+            backend=self.gt_backend,
+        )
+        intp_store = gt_store.empty(
+            shape=shape2d,
+            mask="IJ",
+            default_origin=(0, 0),
+            dtype=self.dtype,
+            backend=self.gt_backend,
+        )
 
         if self.direction == "up":
             gts_intp_up(fld_store, grid_store, lvl, intp_store, np.nan)
