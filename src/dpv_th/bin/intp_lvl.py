@@ -4,6 +4,7 @@ from __future__ import annotations
 # Standard library
 import dataclasses as dc
 import sys
+from collections.abc import Sequence
 from typing import Any
 
 # Third-party
@@ -23,10 +24,11 @@ def write(intp_flds: dict[str, npt.NDArray[np.float_]], config: Config) -> None:
     grid_var = ds_in.variables[config.grid_var]
     dims = grid_var.dims
     assert dims == ("time", "lev", "lat", "lon"), str(dims)
+    lvls: npt.NDArray[np.float_] = np.array(config.lvls)
     da_lev = xr.DataArray(
         name="lev",
-        data=[config.lvl],
-        coords={"lev": [config.lvl]},
+        data=lvls,
+        coords={"lev": lvls},
         attrs={
             "long_name": f"{config.grid_var} levels",
             "units": ds_in.variables[config.grid_var].attrs["units"],
@@ -42,10 +44,10 @@ def write(intp_flds: dict[str, npt.NDArray[np.float_]], config: Config) -> None:
     fld_var = ds_in.variables[config.fld_var]
     assert fld_var.dims == dims, str(fld_var.dims)
     for name, intp_fld in intp_flds.items():
-        assert len(intp_fld.shape) == 2, str(intp_fld.shape)
+        assert len(intp_fld.shape) == 3, str(intp_fld.shape)
         da_fld = xr.DataArray(
             name=name,
-            data=intp_fld[None, None, :, :],
+            data=intp_fld[None, :, :, :],
             dims=dims,
             attrs=fld_var.attrs,
         )
@@ -65,7 +67,8 @@ class Config:
     outfile: PathLike_T
     grid_var: str
     fld_var: str
-    lvl: float
+    lvls: Sequence[float]
+    direction: str
 
 
 @click.command(
@@ -101,9 +104,17 @@ class Config:
 @click.option(
     "-l",
     "--lvl",
-    help="Level to which to interpolate field.",
+    "lvls",
+    help="Level to which to interpolate field; may be repeated.",
     type=float,
-    default=320,
+    default=[320],
+    multiple=True,
+)
+@click.option(
+    "--direction",
+    help="Direction in which vertical inpolation is performed.",
+    type=click.Choice(["down", "up", "both"]),
+    default="down",
 )
 def cli(**config_kwargs: Any) -> int:
     """Entry point from command line."""
@@ -116,14 +127,24 @@ def cli(**config_kwargs: Any) -> int:
         fld = ds.variables[config.fld_var].data[0, :, :, :]
     grid = np.moveaxis(grid, 0, 2)
     fld = np.moveaxis(fld, 0, 2)
-    print(f"interpolate {config.fld_var} to {config.grid_var} at {config.lvl}")
-    intp_fld_up = LevelInterpolator(grid, direction="up").to_level(fld, config.lvl)
-    print(f"interpolate {config.fld_var} to {config.grid_var} at {config.lvl}")
-    intp_fld_down = LevelInterpolator(grid, direction="down").to_level(fld, config.lvl)
-    intp_flds = {
-        f"{config.fld_var}_up": intp_fld_up,
-        f"{config.fld_var}_down": intp_fld_down,
-    }
+    intp_flds: dict[str, npt.NDArray[np.float_]] = {}
+    for direction in ["down", "up"]:
+        if config.direction in [direction, "both"]:
+            print(
+                f"interpolate ({direction}) {config.fld_var} to {config.grid_var} at "
+                + ", ".join(map(str, config.lvls))
+            )
+            intp = LevelInterpolator(grid, direction=direction).to_levels(
+                fld, config.lvls
+            )
+            name = config.fld_var
+            if config.direction == "both":
+                name += f"_{direction}"
+            intp_flds[name] = intp
+    if config.direction == "both":
+        intp_flds[f"{config.fld_var}_down-up"] = (
+            intp_flds[f"{config.fld_var}_down"] - intp_flds[f"{config.fld_var}_up"]
+        )
     print(f"write {', '.join(intp_flds)} to {config.outfile}")
     write(intp_flds, config)
     return 0

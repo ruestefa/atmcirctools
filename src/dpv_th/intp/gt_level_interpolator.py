@@ -180,6 +180,20 @@ class LevelInterpolator:
 
         return np.asarray(intp_store.data, dtype_in)
 
+    def to_levels(
+        self, fld: npt.ArrayLike, lvls: npt.ArrayLike
+    ) -> npt.NDArray[np.float_]:
+        """Interpolate to multiple levels."""
+        lvls = np.asarray(lvls, self.dtype)
+        if len(lvls.shape) != 1:
+            raise ValueError(
+                f"lvls must be a one-dimensional array-like, but has shape {lvls.shape}"
+            )
+        layers: list[npt.NDArray[np.float_]] = []
+        for lvl in lvls:
+            layers.append(self.to_level(fld, lvl))
+        return np.array(layers)
+
     def _derive_direction(self) -> InterpolationDirection:
         """Derive interpol. direction from monotonically in-/decreasing grid."""
         deltas = self.grid[:, :, 1:] - self.grid[:, :, :-1]
