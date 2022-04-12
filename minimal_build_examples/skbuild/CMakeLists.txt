@@ -107,12 +107,12 @@ if (UNIX)
     if (APPLE)
         set_target_properties(
             ${generated_module_file} PROPERTIES
-            LINK_FLAGS  '-Wl,-dylib,-undefined,dynamic_lookup'
+            LINK_FLAGS "-Wl,-dylib,-undefined,dynamic_lookup"
         )
     else()
         set_target_properties(
             ${generated_module_file} PROPERTIES
-            LINK_FLAGS  '-Wl,--allow-shlib-undefined'
+            LINK_FLAGS "-Wl,--allow-shlib-undefined"
         )
     endif()
 endif()
