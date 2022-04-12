@@ -68,58 +68,126 @@ message(Python_SITELIB=${Python_SITELIB})
 find_package(NumPy REQUIRED MODULE) # for ${NumPy_INCLUDE_DIRS}
 find_package(F2PY REQUIRED) # for ${F2PY_INCLUDE_DIR}
 
+#-------------------------------------------------------------------------------
+# Extension module form _deriv_f77.f
+#-------------------------------------------------------------------------------
+
 # Prepping the module
-set(f2py_module_name "_deriv_f77")
-set(fortran_src_file "${CMAKE_SOURCE_DIR}/src/dpv_th/deriv/_deriv_f77.f")
-set(generated_module_file ${f2py_module_name}${PYTHON_EXTENSION_MODULE_SUFFIX})
+set(f2py_mod_name_f77 "_deriv_f77")
+set(f2py_mod_dir_f77 "src/dpv_th/deriv")
+set(f_src_file_f77 "${CMAKE_SOURCE_DIR}/${f2py_mod_dir_f77}/${f2py_mod_name_f77}.f")
+set(f2py_cmod_file_f77 "${f2py_mod_dir_f77}/${f2py_mod_name_f77}module.c")
+set(ext_mod_file_f77 "${f2py_mod_name_f77}${PYTHON_EXTENSION_MODULE_SUFFIX}")
 
 # Target for enforcing dependencies
-add_custom_target(${f2py_module_name} ALL DEPENDS "${fortran_src_file}")
+add_custom_target(${f2py_mod_name_f77} ALL DEPENDS "${f_src_file_f77}")
 
 # Custom command for generating .c
 add_custom_command(
-    OUTPUT "${f2py_module_name}module.c"
+    OUTPUT "${f2py_cmod_file_f77}"
     COMMAND ${F2PY_EXECUTABLE}
-        -m ${f2py_module_name}
-        ${fortran_src_file}
+        -m ${f2py_mod_name_f77}
+        ${f_src_file_f77}
+        --build-dir ${f2py_mod_dir_f77}
         --lower
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ${fortran_src_file}
+    DEPENDS ${f_src_file_f77}
 )
 
 add_library(
-    ${generated_module_file} MODULE
-    "${f2py_module_name}module.c"
+    ${ext_mod_file_f77} MODULE
+    "${f2py_cmod_file_f77}"
     "${F2PY_INCLUDE_DIR}/fortranobject.c"
-    "${fortran_src_file}"
+    "${f_src_file_f77}"
 )
 
 target_include_directories(
-    ${generated_module_file} PUBLIC
+    ${ext_mod_file_f77} PUBLIC
     ${F2PY_INCLUDE_DIRS}
     ${PYTHON_INCLUDE_DIRS}
 )
-set_target_properties(${generated_module_file} PROPERTIES SUFFIX "")
-set_target_properties(${generated_module_file} PROPERTIES PREFIX "")
-# set_target_properties(${generated_module_file} PROPERTIES COMPILE_FLAGS "-std=legacy")
+set_target_properties(${ext_mod_file_f77} PROPERTIES SUFFIX "")
+set_target_properties(${ext_mod_file_f77} PROPERTIES PREFIX "")
 
 # Linker fixes
 if (UNIX)
     if (APPLE)
         set_target_properties(
-            ${generated_module_file} PROPERTIES
+            ${ext_mod_file_f77} PROPERTIES
             LINK_FLAGS "-Wl,-dylib,-undefined,dynamic_lookup"
         )
     else()
         set_target_properties(
-            ${generated_module_file} PROPERTIES
+            ${ext_mod_file_f77} PROPERTIES
             LINK_FLAGS "-Wl,--allow-shlib-undefined"
         )
     endif()
 endif()
 
 if (SKBUILD)
-    install(TARGETS ${generated_module_file} DESTINATION src/dpv_th/deriv)
+    install(TARGETS ${ext_mod_file_f77} DESTINATION ${f2py_mod_dir_f77})
 else()
-    install(TARGETS ${generated_module_file} DESTINATION ${CMAKE_SOURCE_DIR}/src/dpv_th/deriv)
+    install(TARGETS ${ext_mod_file_f77} DESTINATION ${CMAKE_SOURCE_DIR}/${f2py_mod_dir_f77})
+endif()
+
+#-------------------------------------------------------------------------------
+# Extension module form _deriv_f90.f90
+#-------------------------------------------------------------------------------
+
+# Prepping the module
+set(f2py_mod_name_f90 "_deriv_f90")
+set(f2py_mod_dir_f90 "src/dpv_th/deriv")
+set(f_src_file_f90 "${CMAKE_SOURCE_DIR}/${f2py_mod_dir_f90}/${f2py_mod_name_f90}.f90")
+set(f2py_cmod_file_f90 "${f2py_mod_dir_f90}/${f2py_mod_name_f90}module.c")
+set(ext_mod_file_f90 "${f2py_mod_name_f90}${PYTHON_EXTENSION_MODULE_SUFFIX}")
+
+# Target for enforcing dependencies
+add_custom_target(${f2py_mod_name_f90} ALL DEPENDS "${f_src_file_f90}")
+
+# Custom command for generating .c
+add_custom_command(
+    OUTPUT "${f2py_cmod_file_f90}"
+    COMMAND ${F2PY_EXECUTABLE}
+        -m ${f2py_mod_name_f90}
+        ${f_src_file_f90}
+        --build-dir ${f2py_mod_dir_f90}
+        --lower
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${f_src_file_f90}
+)
+
+add_library(
+    ${ext_mod_file_f90} MODULE
+    "${f2py_cmod_file_f90}"
+    "${F2PY_INCLUDE_DIR}/fortranobject.c"
+    "${f_src_file_f90}"
+)
+
+target_include_directories(
+    ${ext_mod_file_f90} PUBLIC
+    ${F2PY_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_DIRS}
+)
+set_target_properties(${ext_mod_file_f90} PROPERTIES SUFFIX "")
+set_target_properties(${ext_mod_file_f90} PROPERTIES PREFIX "")
+
+# Linker fixes
+if (UNIX)
+    if (APPLE)
+        set_target_properties(
+            ${ext_mod_file_f90} PROPERTIES
+            LINK_FLAGS "-Wl,-dylib,-undefined,dynamic_lookup"
+        )
+    else()
+        set_target_properties(
+            ${ext_mod_file_f90} PROPERTIES
+            LINK_FLAGS "-Wl,--allow-shlib-undefined"
+        )
+    endif()
+endif()
+
+if (SKBUILD)
+    install(TARGETS ${ext_mod_file_f90} DESTINATION ${f2py_mod_dir_f90})
+else()
+    install(TARGETS ${ext_mod_file_f90} DESTINATION ${CMAKE_SOURCE_DIR}/${f2py_mod_dir_f90})
 endif()
