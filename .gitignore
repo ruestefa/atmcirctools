@@ -16,3 +16,4 @@ __pycache__/
 .tox/
 .gt_cache
 /data
+_skbuild/
