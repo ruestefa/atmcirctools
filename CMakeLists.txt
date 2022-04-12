@@ -28,8 +28,6 @@ message("--")
 
 project(
     dpv_th
-    VERSION 0.0.0
-    DESCRIPTION "Compute gradient of PV on TH surfaces."
     LANGUAGES C Fortran
 )
 
