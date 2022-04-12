@@ -1,5 +1,5 @@
-atmcirclib == 0.2.0
-# gt4py
+atmcirclib==0.2.0
+gt4py==2022.04.09
 click
 h5netcdf
 numpy
