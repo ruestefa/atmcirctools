@@ -1,0 +1,3 @@
+"""Stub file for Fortran extension module ``hello.hello``."""
+
+def say_hello() -> None: ...
