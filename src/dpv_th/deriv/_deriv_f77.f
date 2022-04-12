@@ -17,12 +17,19 @@ c     <vert>, the grid in <xmin,ymin,dx,dy,nx,ny,nz,mdv>.
 
 c     Declaration of subroutine parameters
       integer nx,ny,nz
+cf2py intent(in) nx,ny,nz
       real    gradx(nx,ny,nz)
+cf2py intent(out) gradx
       real    grady(nx,ny,nz)
+cf2py intent(out) grady
       real    scalar(nx,ny,nz)
+cf2py intent(in) scalar
       real    vert(nx,ny,nz)
+cf2py intent(in) vert
       real    xmin,ymin,dx,dy
+cf2py intent(in) xmin,ymin,dx,dy
       real    mdv
+cf2py intent(in) mdv
 
 c     Calculate the derivatives in x and y direction
       call deriv (gradx,scalar,'x',vert,xmin,ymin,dx,dy,nx,ny,nz,mdv)
@@ -48,12 +55,19 @@ c     in <xmin,ymin,dx,dy,nx,ny,nz,mdv>.
 
 c     Declaration of subroutine parameters
       integer    nx,ny,nz
+cf2py intent(in) nx,ny,nz
       real       u3(nx,ny,nz)
+cf2py intent(in) u3
       real       v3(nx,ny,nz)
+cf2py intent(in) v3
       real       vort3(nx,ny,nz)
+cf2py intent(out) vort3
       real       vert(nx,ny,nz)
+cf2py intent(in) vert
       real       xmin,ymin,dx,dy
+cf2py intent(in) xmin,ymin,dx,dy
       real       mdv
+cf2py intent(in) mdv
 
 c     Mathematical and physical parameters
       real       pi180
@@ -144,12 +158,19 @@ c     in <xmin,ymin,dx,dy,nx,ny,nz,mdv>.
 
 c     Declaration of subroutine parameters
       integer    nx,ny,nz
+cf2py intent(in) nx,ny,nz
       real       u3(nx,ny,nz)
+cf2py intent(in) u3
       real       v3(nx,ny,nz)
+cf2py intent(in) v3
       real       div3(nx,ny,nz)
+cf2py intent(out) div3
       real       vert(nx,ny,nz)
+cf2py intent(in) vert
       real       xmin,ymin,dx,dy
+cf2py intent(in) xmin,ymin,dx,dy
       real       mdv
+cf2py intent(in) mdv
 
 c     Mathematical and physical parameters
       real       pi180
@@ -243,11 +264,17 @@ c     problems when calculating fields at boundary points
 
 c     Declaration of subroutine parameters
       integer nx,ny,nz
+cf2py intent(in) nx,ny,nz
       real    gri(nx,ny,nz)
+cf2py intent(in) gri
       real    aur(0:nx+1,0:ny+1,0:nz+1)
+cf2py intent(out) aur
       integer dir
+cf2py intent(in) dir
       real    xmin,ymin,dx,dy
+cf2py intent(in) xmin,ymin,dx,dy
       real    mdv
+cf2py intent(in) mdv
 
 c     Numerical and physical parameters
       real       eps
@@ -536,12 +563,19 @@ c     index arrray <vert(i,j,k)=k>.
 
 c     Input and output parameters
       integer    nx,ny,nz
+cf2py intent(in) nx,ny,nz
       real       dfield(nx,ny,nz)
+cf2py intent(out) dfield
       real       field(nx,ny,nz)
+cf2py intent(in) field
       real       vert(nx,ny,nz)
+cf2py intent(in) vert
       character  direction
+cf2py intent(in) direction
       real       xmin,ymin,dx,dy
+cf2py intent(in) xmin,ymin,dx,dy
       real       mdv
+cf2py intent(in) mdv
 
 c     Numerical and physical parameters
       real       pi180
@@ -773,10 +807,15 @@ c     If a coordinate point is not accepted, it is set to <mdv>.
 
 c     Declaration of subroutine parameters
       integer   nx,ny,nz
+cf2py intent(in) nx,ny,nz
       real      vert(0:nx+1,0:ny+1,0:nz+1)
+cf2py intent(inout) vert
       real      xmin,ymin,dx,dy
+cf2py intent(in) xmin,ymin,dx,dy
       real      mdv
+cf2py intent(in) mdv
       character vertcoord
+cf2py intent(in) vertcoord
 
 c     Set the allowed values for the vertical coordinates
       real      pmin,pmax

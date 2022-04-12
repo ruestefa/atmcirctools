@@ -22,12 +22,19 @@
 
 !     Declaration of subroutine parameters
       integer nx,ny,nz
+!f2py intent(in) nx,ny,nz
       real    gradx(nx,ny,nz)
+!f2py intent(out) gradx
       real    grady(nx,ny,nz)
+!f2py intent(out) grady
       real    scalar(nx,ny,nz)
+!f2py intent(in)  scalar
       real    vert(nx,ny,nz)
+!f2py intent(in) vert
       real    xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real    mdv
+!f2py intent(in) mdv
 
 !     Calculate the derivatives in x and y direction
       call deriv (gradx,scalar,'x',vert,xmin,ymin,dx,dy,nx,ny,nz,mdv)
@@ -49,14 +56,22 @@
 
 !     Declaration of subroutine parameters
       integer    nx,ny,nz
+!f2py intent(in) nx,ny,nz
       real       u3(nx,ny,nz)
+!f2py intent(in)  u3
       real       v3(nx,ny,nz)
+!f2py intent(in)  v3
       real       f3(nx,ny,nz)
+!f2py intent(in) f3
 
       real       adv3(nx,ny,nz)
+!f2py intent(out) adv3
       real       vert(nx,ny,nz)
+!f2py intent(in) vert
       real       xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real       mdv
+!f2py intent(in) mdv
 
 !     Mathematical and physical parameters
       real       pi180
@@ -106,12 +121,19 @@
 
 !     Declaration of subroutine parameters
       integer    nx,ny,nz
+!f2py intent(in) nx,ny,nz
       real       u3(nx,ny,nz)
+!f2py intent(in) u3
       real       v3(nx,ny,nz)
+!f2py intent(in) v3
       real       vort3(nx,ny,nz)
+!f2py intent(out) vort3
       real       vert(nx,ny,nz)
+!f2py intent(in) vert
       real       xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real       mdv
+!f2py intent(in) mdv
 
 !     Mathematical and physical parameters
       real       pi180
@@ -192,12 +214,19 @@
 
 !     Declaration of subroutine parameters
       integer    nx,ny,nz
+!f2py intent(in) nx,ny,nz
       real       u3(nx,ny,nz)
+!f2py intent(in) u3
       real       v3(nx,ny,nz)
+!f2py intent(in) v3
       real       div3(nx,ny,nz)
+!f2py intent(out) div3
       real       vert(nx,ny,nz)
+!f2py intent(in) vert
       real       xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real       mdv
+!f2py intent(in) mdv
 
 !     Mathematical and physical parameters
       real       pi180
@@ -279,20 +308,30 @@
 
 !     Declaration of subroutine parameters
       integer nx,ny,nz
+!f2py intent(in) nx,ny,nz
       integer i,j,k
       real    a(nx,ny,nz)
+!f2py intent(in) a
       real    b(nx,ny,nz)
+!f2py intent(in) b
       real    c(nx,ny,nz)
+!f2py intent(in) c
       real    dd(nx,ny,nz)	! derivative (only one is needed)
       real    scalar(nx,ny,nz)
+!f2py intent(out) scalar
       real    tanlat(nx,ny)
       real    vert(nx,ny,nz)
+!f2py intent(in) vert
       real    xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real    mdv
+!f2py intent(in) mdv
       real    lat
 
       character  dir
+!f2py intent(in) dir
       character  comp
+!f2py intent(in) comp
 
 !     Mathematical and physical parameters
       real       pi180
@@ -523,23 +562,35 @@
 
 !     Declaration of subroutine parameters
       integer nx,ny,nz
+!f2py intent(in) nx,ny,nz
       integer i,j,k
       real    A1(nx,ny,nz)
+!f2py intent(in) A1
       real    A2(nx,ny,nz)
+!f2py intent(in) A2
       real    A3(nx,ny,nz)
+!f2py intent(in) A3
       real    B1(nx,ny,nz)
+!f2py intent(in) B1
       real    B2(nx,ny,nz)
+!f2py intent(in) B2
       real    B3(nx,ny,nz)
+!f2py intent(in) B3
       real    ddx(nx,ny,nz)
       real    ddy(nx,ny,nz)
       real    ddz(nx,ny,nz)
       real    scalar(nx,ny,nz)
+!f2py intent(out) scalar
       real    vert(nx,ny,nz)
+!f2py intent(in) vert
       real    xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real    mdv
+!f2py intent(in) mdv
       real    lat
 
       character  comp
+!f2py intent(in) comp
 
 !     Mathematical and physical parameters
       real       pi180
@@ -635,20 +686,28 @@
 
 !     Declaration of subroutine parameters
       integer nx,ny,nz
+!f2py intent(in) nx,ny,nz
       real    u(nx,ny,nz)
+!f2py intent(in) u
       real    v(nx,ny,nz)
+!f2py intent(in) v
       real    dudx(nx,ny,nz)
       real    dudy(nx,ny,nz)
       real    dvdx(nx,ny,nz)
       real    dvdy(nx,ny,nz)
       real    F1(nx,ny,nz)
+!f2py intent(out) F1
       real    F2(nx,ny,nz)
+!f2py intent(out) F2
       real    coslat(nx,ny)
       real    ucos(nx,ny,nz)
       real    vcos(nx,ny,nz)
       real    vert(nx,ny,nz)
+!f2py intent(in) vert
       real    xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real    mdv
+!f2py intent(in) mdv
       real    lat
       integer i,j,k
 
@@ -744,11 +803,17 @@
 
 !     Declaration of subroutine parameters
       integer nx,ny,nz
+!f2py intent(in) nx,ny,nz
       real    gri(nx,ny,nz)
+!f2py intent(in) gri
       real    aur(0:nx+1,0:ny+1,0:nz+1)
+!f2py intent(out) aur
       integer dir
+!f2py intent(in) dir
       real    xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real    mdv
+!f2py intent(in) mdv
 
 !     Numerical and physical parameters
       real       eps
@@ -1011,12 +1076,19 @@
 
 !     Input and output parameters
       integer    nx,ny,nz
+!f2py intent(in) nx,ny,nz
       real       dfield(nx,ny,nz)
+!f2py intent(out) dfield
       real       field(nx,ny,nz)
+!f2py intent(in) field
       real       vert(nx,ny,nz)
+!f2py intent(in) vert
       character  direction
+!f2py intent(in) direction
       real       xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real       mdv
+!f2py intent(in) mdv
 
 !     Numerical and physical parameters
       real       pi180
@@ -1231,15 +1303,25 @@
 
 !     Input and output parameters
       integer    nx,ny,nz
+!f2py intent(in) nx,ny,nz
       real       Anew(nx,ny,nz)
+!f2py intent(in) Anew
       real       Anow(nx,ny,nz)
+!f2py intent(in) Anow
       real       Aold(nx,ny,nz)
+!f2py intent(in) Aold
       real       Pnew(nx,ny,nz)
+!f2py intent(in) Pnew
       real       Pnow(nx,ny,nz)
+!f2py intent(in) Pnow
       real       Pold(nx,ny,nz)
+!f2py intent(in) Pold
       real       xmin,ymin,dx,dy
+!f2py intent(in) xmin,ymin,dx,dy
       real       mdv
+!f2py intent(in) mdv
       real 	 dt
+!f2py intent(in) dt
 
 !     Numerical and physical parameters
       real       zerodiv
@@ -1251,6 +1333,7 @@
       integer    i,j,k
       real       scale
       real       dAnow(nx,ny,nz)
+!f2py intent(out) dAnow
       real       Anow_aura(0:nx+1,0:ny+1,0:nz+1)
       real       Pnow_aura(0:nx+1,0:ny+1,0:nz+1)
 
