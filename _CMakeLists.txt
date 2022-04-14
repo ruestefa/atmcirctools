@@ -27,7 +27,7 @@ message("--")
 #-------------------------------------------------------------------------------
 
 project(
-    dpv_th
+    "dpv-th"
     LANGUAGES C Fortran
 )
 
@@ -88,85 +88,84 @@ find_package(F2PY REQUIRED) # for ${F2PY_INCLUDE_DIR}
 # Build Fortran extension modules
 #-------------------------------------------------------------------------------
 
-set(
-    f_src_files_rel
-    "src/dpv_th/deriv/_deriv_f77.f"
-    "src/dpv_th/deriv/_deriv_f90.f90"
-)
-
-foreach(f_src_file_rel ${f_src_files_rel})
-    set(f_src_file_abs "${CMAKE_SOURCE_DIR}/${f_src_file_rel}")
-    get_filename_component(f2py_mod_name ${f_src_file_rel} NAME_WLE)
-    get_filename_component(f_src_dir ${f_src_file_rel} DIRECTORY)
-    set(f2py_mod_dir "${f_src_dir}/${f2py_mod_name}")
-    set(f2py_cmod_file "${f2py_mod_dir}/${f2py_mod_name}module.c")
-    set(ext_mod_file "${f2py_mod_name}${PYTHON_EXTENSION_MODULE_SUFFIX}")
+macro(f2py rpath_mod_f)
+    set(apath_mod_f "${CMAKE_SOURCE_DIR}/${rpath_mod_f}")
+    get_filename_component(mod "${rpath_mod_f}" NAME_WLE)
+    get_filename_component(rpath "${rpath_mod_f}" DIRECTORY)
+    string(REGEX REPLACE "/" "__" _pre "${rpath}")
+    set(_pre_mod "${_pre}${mod}")
+    set(mod_c "${mod}module.c")
+    set(_pre_mod_c "${_pre_mod}module.c")
+    set(rpath_pre_mod_c "${rpath}/${_pre_mod_c}")
+    set(mod_so "${mod}${PYTHON_EXTENSION_MODULE_SUFFIX}")
+    set(pre_mod_so "${_pre}${mod_so}")
+    set(rpath_pre_mod_so "${rpath}/${pre_mod_so}")
 
     message("-- Extension module:")
-    message("   f_src_file_rel = ${f_src_file_rel}")
-    message("   f_src_file_abs = ${f_src_file_abs}")
-    message("   f_src_dir      = ${f_src_dir}")
-    message("   f2py_mod_name  = ${f2py_mod_name}")
-    message("   f2py_mod_dir   = ${f2py_mod_dir}")
-    message("   f2py_cmod_file = ${f2py_cmod_file}")
-    message("   ext_mod_file   = ${ext_mod_file}")
+    message("   rpath_mod_f      = ${rpath_mod_f}")
+    message("   apath_mod_f      = ${apath_mod_f}")
+    message("   mod              = ${mod}")
+    message("   rpath            = ${rpath}")
+    message("   _pre             = ${_pre}")
+    message("   _pre_mod         = ${_pre_mod}")
+    message("   mod_c            = ${mod_c}")
+    message("   _pre_mod_c       = ${_pre_mod_c}")
+    message("   rpath_pre_mod_c  = ${rpath_pre_mod_c}")
+    message("   mod_so           = ${mod_so}")
+    message("   pre_mod_so       = ${pre_mod_so}")
+    message("   rpath_pre_mod_so = ${rpath_pre_mod_so}")
     message("--")
 
-    # Target for enforcing dependencies
-    add_custom_target(${f2py_mod_name} ALL DEPENDS "${f_src_file_abs}")
-
-    # Custom command for generating .c
+    # Use `f2py` to create `prefix_modmodule.c` from `mod.f90`
     add_custom_command(
-        OUTPUT "${f2py_cmod_file}"
-        COMMAND ${F2PY_EXECUTABLE}
-            -m ${f2py_mod_name}
-            ${f_src_file_abs}
-            --build-dir ${f2py_mod_dir}
-            --lower
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        DEPENDS ${f_src_file_abs}
+        OUTPUT "${rpath_pre_mod_c}"
+        COMMAND ${F2PY_EXECUTABLE} -m "${mod}" "${apath_mod_f}" --build-dir "${rpath}" --lower
+        COMMAND mv -v "${rpath}/${mod_c}" "${rpath_pre_mod_c}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        DEPENDS "${apath_mod_f}"
     )
 
+    # Create `pefix_mod.cpython-39.x86_64-linux-gnu.so` from `prefix_modmodule.c` and `mod.f90`
     add_library(
-        ${ext_mod_file} MODULE
-        "${f2py_cmod_file}"
+        "${pre_mod_so}" MODULE
+        "${rpath_pre_mod_c}"
         "${F2PY_INCLUDE_DIR}/fortranobject.c"
-        "${f_src_file_abs}"
+        "${apath_mod_f}"
     )
     set_target_properties(
-        ${ext_mod_file} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${f2py_mod_dir}"
+        "${pre_mod_so}" PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${rpath}"
+        PREFIX ""
+        SUFFIX ""
     )
+    target_include_directories("${pre_mod_so}" PUBLIC ${F2PY_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 
-    target_include_directories(
-        ${ext_mod_file} PUBLIC
-        ${F2PY_INCLUDE_DIRS}
-        ${PYTHON_INCLUDE_DIRS}
-    )
-    set_target_properties(${ext_mod_file} PROPERTIES SUFFIX "")
-    set_target_properties(${ext_mod_file} PROPERTIES PREFIX "")
-
-    # Linker fixes
+    # Set platform-specific linker flags
     if (UNIX)
         if (APPLE)
-            set_target_properties(
-                ${ext_mod_file} PROPERTIES
-                LINK_FLAGS "-Wl,-dylib,-undefined,dynamic_lookup"
-            )
+            set(mod_so_link_flags "-Wl,-dylib,-undefined,dynamic_lookup")
         else()
-            set_target_properties(
-                ${ext_mod_file} PROPERTIES
-                LINK_FLAGS "-Wl,--allow-shlib-undefined"
-            )
+            set(mod_so_link_flags "-Wl,--allow-shlib-undefined")
         endif()
+        set_target_properties("${pre_mod_so}" PROPERTIES LINK_FLAGS "${mod_so_link_flags}")
     endif()
 
+    # Install `pefix_mod.cpython-39.x86_64-linux-gnu.so` as `mod.cpython-...-gnu.so` in source tree
     if (SKBUILD)
-        install(TARGETS ${ext_mod_file} DESTINATION ${f_src_dir})
+        set(install_dir_mod_so "${rpath}")
     else()
-        install(TARGETS ${ext_mod_file} DESTINATION ${CMAKE_SOURCE_DIR}/${f_src_dir})
+        set(install_dir_mod_so "${CMAKE_SOURCE_DIR}/${rpath}")
     endif()
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/${rpath_pre_mod_so}"
+        DESTINATION "${install_dir_mod_so}"
+        RENAME "${mod_so}"
+    )
+endmacro()
 
-endforeach()
+# Note: Without any install targets, CMakeLists.txt won't compile, so rename it to _CMakeLists.txt
+# f2py("src/atmcirclib/deriv/ext/_f77/deriv.f")
+# f2py("src/atmcirclib/deriv/ext/_f90/deriv.f90")
 
 #-------------------------------------------------------------------------------
 # Done
