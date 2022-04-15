@@ -9,7 +9,7 @@ dependencies:
   - anaconda-client=1.8.0
   - astroid=2.11.2
   - asttokens=2.0.5
-  - atmcirclib=0.2.1
+  - atmcirclib=0.2.2
   - attrs=21.4.0
   - backcall=0.2.0
   - backports=1.0

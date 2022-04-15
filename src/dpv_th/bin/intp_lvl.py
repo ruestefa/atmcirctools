@@ -12,10 +12,8 @@ import click
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
+from atmcirclib.intp import LevelInterpolator
 from atmcirclib.typing import PathLike_T
-
-# First-party
-from dpv_th.intp import LevelInterpolator
 
 
 def write(intp_flds: dict[str, npt.NDArray[np.float_]], config: Config) -> None:
