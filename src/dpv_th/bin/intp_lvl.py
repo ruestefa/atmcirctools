@@ -16,31 +16,37 @@ from atmcirclib.intp import LevelInterpolator
 from atmcirclib.typing import PathLike_T
 
 
+def check_dims(dims: tuple[str, ...], xp_dims: tuple[str, ...]) -> None:
+    """Check dimension names."""
+    if dims != xp_dims:
+        raise Exception(f"expected dims {xp_dims}, got {dims}")
+
+
 def write(intp_flds: dict[str, npt.NDArray[np.float_]], config: Config) -> None:
     """Write interpolated field to disk."""
     ds_in = xr.open_dataset(config.infile)
     grid_var = ds_in.variables[config.grid_var]
     dims = grid_var.dims
-    assert dims == ("time", "lev", "lat", "lon"), str(dims)
+    check_dims(dims, config.dim_names)
     lvls: npt.NDArray[np.float_] = np.array(config.lvls)
-    da_lev = xr.DataArray(
-        name="lev",
+    da_vert = xr.DataArray(
+        name=config.dim_names[1],
         data=lvls,
-        coords={"lev": lvls},
+        coords={config.dim_names[1]: lvls},
         attrs={
             "long_name": f"{config.grid_var} levels",
             "units": ds_in.variables[config.grid_var].attrs["units"],
         },
     )
     coords = {
-        "time": ds_in.time,
-        "lev": da_lev,
-        "lat": ds_in.lat,
-        "lon": ds_in.lon,
+        config.dim_names[0]: ds_in.variables[config.dim_names[0]],
+        config.dim_names[1]: da_vert,
+        config.dim_names[2]: ds_in.variables[config.dim_names[2]],
+        config.dim_names[3]: ds_in.variables[config.dim_names[3]],
     }
     data_vars: dict[str, xr.DataArray] = {}
     fld_var = ds_in.variables[config.fld_var]
-    assert fld_var.dims == dims, str(fld_var.dims)
+    check_dims(fld_var.dims, dims)
     for name, intp_fld in intp_flds.items():
         assert len(intp_fld.shape) == 3, str(intp_fld.shape)
         da_fld = xr.DataArray(
@@ -66,7 +72,14 @@ class Config:
     grid_var: str
     fld_var: str
     lvls: Sequence[float]
+    dim_names: tuple[str, str, str, str]
     direction: str
+
+    @classmethod
+    def create(cls, **kwargs: Any) -> Config:
+        """Create a new instance from raw arguments."""
+        kwargs["dim_names"] = tuple(kwargs["dim_names"])
+        return cls(**kwargs)
 
 
 @click.command(
@@ -109,6 +122,12 @@ class Config:
     multiple=True,
 )
 @click.option(
+    "--dim-names",
+    help="Dimension names.",
+    default=["time", "lev", "lat", "lon"],
+    nargs=4,
+)
+@click.option(
     "--direction",
     help="Direction in which vertical inpolation is performed.",
     type=click.Choice(["down", "up", "both"]),
@@ -116,11 +135,11 @@ class Config:
 )
 def cli(**config_kwargs: Any) -> int:
     """Entry point from command line."""
-    config = Config(**config_kwargs)
+    config = Config.create(**config_kwargs)
     print(f"read {config.grid_var}, {config.fld_var} from {config.infile}")
     with xr.open_dataset(config.infile) as ds:
         dims = ds.variables[config.grid_var].dims
-        assert dims == ("time", "lev", "lat", "lon"), f"unexpected_dims: {dims}"
+        check_dims(dims, config.dim_names)
         grid = ds.variables[config.grid_var].data[0, :, :, :]
         fld = ds.variables[config.fld_var].data[0, :, :, :]
     grid = np.moveaxis(grid, 0, 2)
