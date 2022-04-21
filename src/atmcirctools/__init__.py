@@ -1,4 +1,4 @@
-"""Top-level package ``dpv_th``."""
+"""Top-level package ``atmcirctools``."""
 # Standard library
 import importlib.metadata
 

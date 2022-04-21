@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 # Standard library
-import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -59,14 +58,14 @@ description_files: list[str] = [
 ]
 
 metadata: dict[str, Any] = {
-    "name": "dpv-th",
+    "name": "atmcirctools",
     "version": "0.0.0",
     "description": "Compute gradient of PV on TH surfaces.",
     "long_description": read_present_files(description_files),
     "author": "Stefan Ruedisuehli",
     "author_email": "stefan.ruedisuehli@env.ethz.ch",
-    "url": "https://git.iac.ethz.ch/atmcirc/tools/dpv-th.git",
-    "keywords": "potential vorticity, gradient, atmospheric science, modeling",
+    "url": "https://git.iac.ethz.ch/atmcirc/tools/atmcirctools.git",
+    "keywords": "atmospheric science, modeling",
 }
 
 classifiers: list[str] = [
@@ -103,7 +102,7 @@ setup(
     # so only list top-level package(s) during development install
     # src: https://github.com/scikit-build/scikit-build/issues/546
     # packages=find_packages("src"),
-    packages=["dpv_th"] if sys.argv[1] == "develop" else find_packages("src"),
+    packages=["atmcirctools"] if sys.argv[1] == "develop" else find_packages("src"),
     package_dir={"": "src"},
     entry_points={"console_scripts": scripts},
     package_data=find_py_typed(),
