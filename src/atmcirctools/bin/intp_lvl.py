@@ -118,7 +118,7 @@ class Config:
     "lvls",
     help="Level to which to interpolate field; may be repeated.",
     type=float,
-    default=[320],
+    default=list(range(305, 371, 5)),
     multiple=True,
 )
 @click.option(
