@@ -8,7 +8,7 @@ repos:
     -   id: check-symlinks
     -   id: check-toml
     -   id: check-yaml
-        exclude: ^recipe/meta*.yaml
+        exclude: meta.yaml
     -   id: debug-statements
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
@@ -36,7 +36,6 @@ repos:
         types: [python]
         entry: mypy
         require_serial: true
-        files: ^(src|tests)/(.*/)*.*\.py$
 -   repo: local
     hooks:
     -   id: jupyter-nb-clear-output
