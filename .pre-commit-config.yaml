@@ -36,6 +36,7 @@ repos:
         types: [python]
         entry: mypy
         require_serial: true
+        files: ^(src|tests)/(.*/)*.*\.py$
 -   repo: local
     hooks:
     -   id: jupyter-nb-clear-output
