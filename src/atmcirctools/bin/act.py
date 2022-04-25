@@ -6,11 +6,11 @@ import sys
 
 # Third-party
 import click
+from atmcirclib.click import Group
 
 # Local
 from .intp_lvl import cli as intp_lvl_cli
 from .shared import CONTEXT_SETTINGS
-from .shared import Group
 
 
 @click.group(

@@ -12,11 +12,11 @@ import click
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
+from atmcirclib.click import Command
 from atmcirclib.intp import LevelInterpolator
 from atmcirclib.typing import PathLike_T
 
 # Local
-from .shared import Command
 from .shared import CONTEXT_SETTINGS
 
 
