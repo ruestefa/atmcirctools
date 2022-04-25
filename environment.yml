@@ -7,7 +7,7 @@ dependencies:
   - _libgcc_mutex=0.1
   - _openmp_mutex=4.5
   - asttokens=2.0.5
-  - atmcirclib=0.2.2
+  - atmcirclib=0.2.3
   - attrs=21.4.0
   - black=22.3.0
   - boltons=21.0.0
@@ -28,7 +28,7 @@ dependencies:
   - dataclasses=0.8
   - devtools=0.8.0
   - executing=0.8.3
-  - fonttools=4.32.0
+  - fonttools=4.33.2
   - freetype=2.10.4
   - geos=3.10.2
   - giflib=5.2.1
@@ -99,7 +99,7 @@ dependencies:
   - pybind11-global=2.9.2
   - pydantic=1.9.0
   - pyparsing=3.0.8
-  - pyproj=3.3.0
+  - pyproj=3.3.1
   - pyshp=2.2.0
   - python=3.9.0
   - python-dateutil=2.8.2
