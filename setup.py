@@ -17,6 +17,10 @@ from skbuild import setup
 
 PackageDataT = Dict[str, List[str]]
 
+PROJECT_NAME: str = "atmcirctools"
+PROJECT_VERSION: str = "0.1.0"
+PYTHON_REQUIRES: str = ">=3.9"
+
 
 def read_present_files(paths: Sequence[str]) -> str:
     """Read the content of files in ``paths`` that exist, ignoring others."""
@@ -58,8 +62,8 @@ description_files: list[str] = [
 ]
 
 metadata: dict[str, Any] = {
-    "name": "atmcirctools",
-    "version": "0.0.0",
+    "name": PROJECT_NAME,
+    "version": PROJECT_VERSION,
     "description": "Compute gradient of PV on TH surfaces.",
     "long_description": read_present_files(description_files),
     "author": "Stefan Ruedisuehli",
@@ -76,9 +80,6 @@ classifiers: list[str] = [
     "Programming Language :: Python :: 3.9",
 ]
 metadata["classifiers"] = classifiers
-
-# Python version requirement
-python_requires: str = ">=3.9"
 
 # Runtime dependencies (top-level and unpinned)
 with open("requirements.in") as f:
@@ -105,12 +106,12 @@ setup(
     # so only list top-level package(s) during development install
     # src: https://github.com/scikit-build/scikit-build/issues/546
     # packages=find_packages("src"),
-    packages=["atmcirctools"] if sys.argv[1] == "develop" else find_packages("src"),
+    packages=[PROJECT_NAME] if sys.argv[1] == "develop" else find_packages("src"),
     package_dir={"": "src"},
     entry_points={"console_scripts": scripts},
     package_data=find_py_typed(),
     include_package_data=True,
-    python_requires=python_requires,
+    python_requires=PYTHON_REQUIRES,
     install_requires=install_requires,
     cmake_args=cmake_args,
     **metadata,
