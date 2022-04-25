@@ -85,7 +85,10 @@ with open("requirements.in") as f:
     install_requires: list[str] = list(map(str, parse_requirements(f.readlines())))
 
 # Format: command=package.module:function
-scripts: list[str] = []
+scripts: list[str] = [
+    "act=atmcirctools.bin.act:cli",
+    "act-intp-lvl=atmcirctools.bin.intp_lvl:cli",
+]
 
 # Obtain version and root of currently active Python environment for cmake
 curr_python_version: str = f"{sys.version_info.major}.{sys.version_info.minor}"

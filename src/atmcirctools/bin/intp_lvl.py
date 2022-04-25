@@ -15,6 +15,10 @@ import xarray as xr
 from atmcirclib.intp import LevelInterpolator
 from atmcirclib.typing import PathLike_T
 
+# Local
+from .shared import Command
+from .shared import CONTEXT_SETTINGS
+
 
 def check_dims(dims: tuple[str, ...], xp_dims: tuple[str, ...]) -> None:
     """Check dimension names."""
@@ -83,7 +87,8 @@ class Config:
 
 
 @click.command(
-    context_settings={"show_default": True, "help_option_names": ["-h", "--help"]},
+    cls=Command,
+    context_settings=CONTEXT_SETTINGS,
     help="Interpolate a 3D field to a 2D surface at a given level",
 )
 @click.option(
