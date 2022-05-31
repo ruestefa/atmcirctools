@@ -1,6 +1,5 @@
 [build-system]
 requires = [
-    "ipython",  # SR_DBG
     "cmake >= 3.22.3",
     "ninja >= 1.10.2; platform_system!='Windows'",
     "numpy >= 1.22.3",
