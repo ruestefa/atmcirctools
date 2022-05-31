@@ -1,6 +1,10 @@
+# atmcirc channel (pinned)
 atmcirclib==0.2.3
 gt4py==2022.04.09
-click
-h5netcdf
-numpy
-xarray
+pycg==0.0.5
+# other channels (unpinned)
+click>=8.1
+h5netcdf>=1.0
+numpy>=1.22
+pygraphviz>=1.9
+xarray>=2022.3
