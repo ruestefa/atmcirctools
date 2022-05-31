@@ -10,7 +10,7 @@ dependencies:
   - astroid=2.11.5
   - asttokens=2.0.5
   - atk-1.0=2.36.0
-  - atmcirclib=0.2.3
+  - atmcirclib=0.3.0
   - attrs=21.4.0
   - backcall=0.2.0
   - backports=1.0
@@ -38,8 +38,8 @@ dependencies:
   - clyent=1.2.2
   - cmake=3.23.2
   - colorama=0.4.4
-  - conda=4.12.0
-  - conda-build=3.21.8
+  - conda=4.13.0
+  - conda-build=3.21.9
   - conda-package-handling=1.8.1
   - cryptography=37.0.2
   - curl=7.83.1
@@ -169,7 +169,7 @@ dependencies:
   - pexpect=4.8.0
   - pickleshare=0.7.5
   - pillow=9.1.1
-  - pip=22.1.1
+  - pip=22.1.2
   - pixman=0.40.0
   - pkginfo=1.8.2
   - platformdirs=2.5.1

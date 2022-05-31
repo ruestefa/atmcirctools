@@ -1,5 +1,5 @@
 # atmcirc channel (pinned)
-atmcirclib==0.2.3
+atmcirclib==0.3.0
 gt4py==2022.04.09
 pycg==0.0.5
 # other channels (unpinned)
