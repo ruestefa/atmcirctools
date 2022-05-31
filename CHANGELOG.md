@@ -1,4 +1,4 @@
-# DPV-TH: Changelog
+# AtmCircTools: Changelog
 
 ## v0.2.0 (2022-05-31)
 
