@@ -18,7 +18,7 @@ from skbuild import setup
 PackageDataT = Dict[str, List[str]]
 
 PROJECT_NAME: str = "atmcirctools"
-PROJECT_VERSION: str = "0.1.0"
+PROJECT_VERSION: str = "0.2.0"
 PYTHON_REQUIRES: str = ">=3.9"
 
 
@@ -88,7 +88,6 @@ with open("requirements.in") as f:
 # Format: command=package.module:function
 console_scripts: list[str] = [
     "act=atmcirctools.bin.act:cli",
-    "act-intp-lvl=atmcirctools.bin.intp_lvl:cli",
 ]
 
 # Obtain version and root of currently active Python environment for cmake
