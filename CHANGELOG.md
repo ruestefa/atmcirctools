@@ -1,10 +1,14 @@
 # AtmCircTools: Changelog
 
-## v0.2.1 (2022-06-08)
+## v0.2.2 (2022-06-08)
 
-- Add missing dependency `toml` and update envs
+- Add missing requirement `toml` and indirect requirement `scikit-build` (for `create-recipe`) and update envs
 - Remove archived conda build recipes; only retain latest as `recipe/meta.yaml`
 - Change default output file of `create-recipe` from `recipe/v{version}/meta.yaml` to `recipe/meta.yaml`
+
+## ~v0.2.1 (2022-06-08)~
+
+- Incomplete; superseded by v0.2.2
 
 ## v0.2.0 (2022-05-31)
 

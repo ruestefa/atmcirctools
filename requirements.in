@@ -7,5 +7,6 @@ click>=8.1
 h5netcdf>=1.0
 numpy>=1.22
 pygraphviz>=1.9
+scikit-build>=0.14
 toml>=0.10
 xarray>=2022.3

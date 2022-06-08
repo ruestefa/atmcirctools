@@ -1,5 +1,5 @@
 {% set name = "atmcirctools" %}
-{% set version = "0.2.0" %}
+{% set version = "0.2.2" %}
 {% set build = "0" %}
 
 package:
@@ -26,13 +26,15 @@ requirements:
     - setuptools>=35.0.2
     - wheel>=0.37.1
   run:
-    - atmcirclib==0.2.3
+    - atmcirclib==0.3.0
     - gt4py==2022.04.09
     - pycg==0.0.5
     - click>=8.1
     - h5netcdf>=1.0
     - numpy>=1.22
     - pygraphviz>=1.9
+    - scikit-build>=0.14
+    - toml>=0.10
     - xarray>=2022.3
 
 test:
