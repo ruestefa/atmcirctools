@@ -1,5 +1,9 @@
 # AtmCircTools: Changelog
 
+## v0.?.? (2022-??-??)
+
+- Update `atmcirclib` to `v0.4.0` and update envs
+
 ## v0.2.2 (2022-06-08)
 
 - Add missing requirement `toml` and indirect requirement `scikit-build` (for `create-recipe`) and update envs

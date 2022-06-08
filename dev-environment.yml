@@ -10,7 +10,7 @@ dependencies:
   - astroid=2.11.5
   - asttokens=2.0.5
   - atk-1.0=2.36.0
-  - atmcirclib=0.3.0
+  - atmcirclib=0.4.0
   - attrs=21.4.0
   - backcall=0.2.0
   - backports=1.0
