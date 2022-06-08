@@ -239,9 +239,10 @@ class MetaYamlFile:
     "--outfile",
     help=(
         "Outfile file path; pass - to write to standard output; use format key"
-        " '{version}' to insert the project version."
+        " '{version}' to insert the project version, e.g.,"
+        " 'recipe/v{version}/meta.yaml'."
     ),
-    default="recipe/v{version}/meta.yaml",
+    default="recipe/meta.yaml",
 )
 def cli(ctx: click.Context, **kwargs: Any) -> None:
     """Command line interface."""
