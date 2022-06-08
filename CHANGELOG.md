@@ -4,13 +4,13 @@
 
 - Add missing dependency `toml` and update envs
 - Remove archived conda build recipes; only retain latest as `recipe/meta.yaml`
+- Change default output file of `create-recipe` from `recipe/v{version}/meta.yaml` to `recipe/meta.yaml`
 
 ## v0.2.0 (2022-05-31)
 
 - Add script `atmcirclib.bin.call_graph` as command `act call-graph`
 - Add script `atmcirclib.bin.create_recipe` as command `act create-recipe`
 - Remove command line tool `act-intp-lvl`
-- Change default output file of `create-recipe` from `recipe/v{version}/meta.yaml` to `recipe/meta.yaml`
 
 ## v0.1.0 (2022-04-25)
 
