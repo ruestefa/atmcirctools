@@ -16,3 +16,4 @@ scikit-build>=0.15
 tox-conda>=0.9
 tox>=3.25
 types-setuptools>=57.4
+types-toml>=0.10
