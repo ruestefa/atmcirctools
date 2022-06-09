@@ -1,10 +1,6 @@
 [build-system]
 requires = [
-    "cmake >= 3.22.3",
-    "ninja >= 1.10.2; platform_system!='Windows'",
-    "numpy >= 1.22.3",
-    "scikit-build >= 0.14.1",
-    "setuptools >= 35.0.2",
-    "wheel >= 0.37.1",
+    "setuptools>=35.0.2",
+    "wheel>=0.37",
 ]
 build-backend = "setuptools.build_meta"

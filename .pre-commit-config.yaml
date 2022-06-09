@@ -32,7 +32,6 @@ repos:
     hooks:
     -   id: mypy
         name: mypy
-        # entry: mypy
         entry: bash run-mypy.sh
         language: system
         types: [python]

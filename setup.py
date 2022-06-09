@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 # Standard library
-import sys
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -13,7 +12,7 @@ from typing import Sequence
 # Third-party
 from pkg_resources import parse_requirements
 from setuptools import find_packages
-from skbuild import setup
+from setuptools import setup
 
 PackageDataT = Dict[str, List[str]]
 
@@ -86,32 +85,16 @@ with open("requirements.in") as f:
     install_requires: list[str] = list(map(str, parse_requirements(f.readlines())))
 
 # Format: command=package.module:function
-console_scripts: list[str] = [
-    "act=atmcirctools.bin.act:cli",
-]
-
-# Obtain version and root of currently active Python environment for cmake
-curr_python_version: str = f"{sys.version_info.major}.{sys.version_info.minor}"
-curr_python_root: str = str(Path(sys.executable).parent.parent)  # remove `bin/python`
-
-# Arguments passed to cmake by scikit-build
-cmake_args: list[str] = [
-    f"-DCMAKE_PREFIX_PATH={curr_python_root}",
-    f"-DCMAKE_PYTHON_VERSION={curr_python_version}",
-]
+console_scripts: list[str] = []
 
 setup(
-    # `packages=find_packages("src")` is broken for projects with subpackages,
-    # so only list top-level package(s) during development install
-    # src: https://github.com/scikit-build/scikit-build/issues/546
-    # packages=find_packages("src"),
-    packages=[PROJECT_NAME] if sys.argv[1] == "develop" else find_packages("src"),
+    packages=find_packages("src"),
     package_dir={"": "src"},
     entry_points={"console_scripts": console_scripts},
     package_data=find_py_typed(),
     include_package_data=True,
     python_requires=PYTHON_REQUIRES,
     install_requires=install_requires,
-    cmake_args=cmake_args,
+    zip_save=False,
     **metadata,
 )

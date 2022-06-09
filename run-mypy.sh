@@ -10,7 +10,7 @@ cd "$(dirname "${0}")"
 
 paths=(
     src/atmcirctools
-    # tests/test_atmcirctools
+    tests/test_atmcirctools
     *.py
 )
 for path in "${paths[@]}"; do
