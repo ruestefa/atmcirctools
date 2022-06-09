@@ -12,12 +12,10 @@ from typing import Optional
 import click
 import pycg
 import pycg.formats
+from atmcirclib.click import CONTEXT_SETTINGS
 from pycg.pycg import CallGraph
 from pycg.pycg import CallGraphGenerator
 from pygraphviz import AGraph
-
-# First-party
-from atmcirclib.click import CONTEXT_SETTINGS
 
 
 @click.command(
