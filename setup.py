@@ -64,7 +64,7 @@ description_files: list[str] = [
 metadata: dict[str, Any] = {
     "name": PROJECT_NAME,
     "version": PROJECT_VERSION,
-    "description": "Compute gradient of PV on TH surfaces.",
+    "description": "Useful tools by the Atmospheric Circulation group",
     "long_description": read_present_files(description_files),
     "author": "Stefan Ruedisuehli",
     "author_email": "stefan.ruedisuehli@env.ethz.ch",
