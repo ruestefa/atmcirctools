@@ -9,7 +9,7 @@ on:
     - main
 
 jobs:
-  pre-commit:
+  pre-commit-conda:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -28,7 +28,7 @@ jobs:
         show-channel-urls: true
     - name: Create conda env
       run: |
-        conda create -n precommit
+        conda create -n precommit python==3.9
         conda activate precommit
         conda install mamba
     - name: Install dependencies
