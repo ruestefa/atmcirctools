@@ -9,7 +9,7 @@ on:
     - main
 
 jobs:
-  pre-commit:
+  pre-commit-conda:
     runs-on: ubuntu-latest
     defaults:
       run:
