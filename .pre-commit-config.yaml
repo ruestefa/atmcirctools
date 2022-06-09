@@ -32,10 +32,12 @@ repos:
     hooks:
     -   id: mypy
         name: mypy
+        # entry: mypy
+        entry: bash run-mypy.sh
         language: system
         types: [python]
-        entry: mypy
         require_serial: true
+        verbose: true
 -   repo: local
     hooks:
     -   id: jupyter-nb-clear-output
