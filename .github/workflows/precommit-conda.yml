@@ -29,15 +29,17 @@ jobs:
     - name: Create conda env
       run: |
         conda create -n precommit
+        conda activate precommit
+        conda install mamba
     - name: Install dependencies
       run: |
         conda activate precommit
-        conda install --yes --file requirements.in
+        mamba install --yes --file requirements.in
         conda deactivate
     - name: Install dev dependencies
       run: |
         conda activate precommit
-        conda install --yes --file dev-requirements.in
+        mamba install --yes --file dev-requirements.in
         conda deactivate
     - name: Install pre-commit hooks
       run: |
@@ -46,6 +48,6 @@ jobs:
         conda deactivate
     - name: Run pre-commit hooks
       run: |
-        conda activate precommit-dev
+        conda activate precommit
         pre-commit run --all-files
         conda deactivate
