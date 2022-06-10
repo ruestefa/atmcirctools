@@ -1,6 +1,6 @@
 # AtmCircTools: Changelog
 
-## v0.?.? (2022-??-??)
+## v0.3.0 (2022-06-10)
 
 - Update `atmcirclib` to `v0.4.0` and update envs
 - Hook project up to copier template [`python-project`](https://git.iac.ethz.ch/atmcirc/templates/python-project) and update
