@@ -3,6 +3,10 @@
 ## v0.?.? (2022-??-??)
 
 - Update `atmcirclib` to `v0.4.0` and update envs
+- Hook project up to copier template [`python-project`](https://git.iac.ethz.ch/atmcirc/templates/python-project) and update
+- Remove leftovers from former scikit-build project structure
+- Implement new command `act check-ncfiles` to sanity-check NetCDF files (by opening them)
+- Remove dependency `h5netcdf`; not used directly, but caused problems with editable pip-install in conda env (pip identified version as 0.0.0, not 1.0.0)
 
 ## v0.2.2 (2022-06-08)
 
