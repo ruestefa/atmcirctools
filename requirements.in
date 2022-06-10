@@ -4,7 +4,6 @@ gt4py==2022.04.09
 pycg==0.0.5
 # other channels (unpinned)
 click>=8.1
-h5netcdf>=1.0
 numpy>=1.22
 pygraphviz>=1.9
 scikit-build>=0.14

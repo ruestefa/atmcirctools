@@ -52,8 +52,6 @@ dependencies:
   - gt4py=2022.04.09
   - gtk2=2.24.33
   - gts=0.7.6
-  - h5netcdf=1.0.0
-  - h5py=3.6.0
   - harfbuzz=3.0.0
   - hdf4=4.2.15
   - hdf5=1.12.1
@@ -139,7 +137,7 @@ dependencies:
   - python-dateutil=2.8.2
   - python_abi=3.9
   - pytz=2022.1
-  - readline=8.1
+  - readline=8.1.2
   - rhash=1.4.1
   - scikit-build=0.15.0
   - scipy=1.8.1
