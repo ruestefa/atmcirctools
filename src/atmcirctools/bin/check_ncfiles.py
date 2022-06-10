@@ -12,10 +12,38 @@ import click
 import netCDF4 as nc
 
 
-def check_ncfile(file: Path) -> None:
+def check_ncfile(  # noqa: max-complexity=13
+    file: Path,
+    style: str = "human",
+    verbosity: int = 1,
+) -> None:
     """Check NetCDF file."""
-    print(file)
-    nc.Dataset(file)
+    if style in ["h", "human"]:
+        plain = False
+    elif style in ["p", "plain"]:
+        plain = True
+    else:
+        raise ValueError(f"invalid style: '{style}'")
+    if not plain and verbosity > 0:
+        print(f"[      ] {file}", end="", flush=True)
+    try:
+        nc.Dataset(file)
+    except Exception as e:
+        if plain and verbosity == 0:
+            print(file)
+        elif plain and verbosity == 1:
+            print(f"{file} {type(e).__name__}")
+        elif plain and verbosity > 1:
+            print(f"F {file} {type(e).__name__}")
+        elif not plain:
+            print(f"\r[ FAIL ] {file} ({type(e).__name__})")
+    else:
+        if plain and verbosity > 1:
+            print(f"- {file} -")
+        elif not plain and verbosity <= 1:
+            print("\r" + (len("[      ] ") + len(str(file))) * " " + "\r", end="")
+        elif not plain and verbosity > 1:
+            print(f"\r[  OK  ] {file}")
 
 
 @click.command(
@@ -56,12 +84,28 @@ def check_ncfile(file: Path) -> None:
     type=float,
     default=None,
 )
+@click.option(
+    "-o",
+    "--output-style",
+    help="Style of output.",
+    type=click.Choice(["h", "human", "p", "plain"]),
+    default="human",
+)
+@click.option(
+    "-v/",
+    "--verbose",
+    "verbosity",
+    help="Increase verbosity; may be repeated.",
+    count=True,
+)
 def cli(
     dirs: list[Path],
     pattern: str,
     do_shuffle: bool,
-    n_max: Optional[int] = None,
-    percent_max: Optional[float] = None,
+    n_max: Optional[int],
+    percent_max: Optional[float],
+    output_style: str,
+    verbosity: int,
 ) -> int:
     """Run command line interface."""
     files: list[Path] = [f for d in dirs for f in d.rglob(pattern)]
@@ -72,7 +116,8 @@ def cli(
     if n_max is not None:
         files = files[:n_max]
     for file in files:
-        check_ncfile(file)
+        check_ncfile(file, style=output_style, verbosity=verbosity)
+    print("\r")
     return 0
 
 
