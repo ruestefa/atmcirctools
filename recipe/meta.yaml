@@ -1,5 +1,5 @@
 {% set name = "atmcirctools" %}
-{% set version = "0.2.2" %}
+{% set version = "0.3.0" %}
 {% set build = "0" %}
 
 package:
@@ -19,18 +19,13 @@ requirements:
   host:
     - python
     - pip
-    - cmake>=3.22.3
-    - ninja>=1.10.2
-    - numpy>=1.22.3
-    - scikit-build>=0.14.1
     - setuptools>=35.0.2
-    - wheel>=0.37.1
+    - wheel>=0.37
   run:
-    - atmcirclib==0.3.0
+    - atmcirclib==0.4.0
     - gt4py==2022.04.09
     - pycg==0.0.5
     - click>=8.1
-    - h5netcdf>=1.0
     - numpy>=1.22
     - pygraphviz>=1.9
     - scikit-build>=0.14
@@ -43,6 +38,6 @@ test:
 
 about:
   license: MIT
-  summary: Compute gradient of PV on TH surfaces.
+  summary: Useful tools by the Atmospheric Circulation group
   description: |
-    # DPV-TH: Compute gradient of PV on TH surfaces.
+    # AtmCircTools: Useful tools by the Atmospheric Circulation group
