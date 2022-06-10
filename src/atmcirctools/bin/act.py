@@ -10,6 +10,7 @@ from atmcirclib.click import Group
 
 # Local
 from . import call_graph
+from . import check_nc
 from . import create_recipe
 from . import intp_lvl
 from .shared import CONTEXT_SETTINGS
@@ -26,6 +27,7 @@ def cli() -> int:
 
 
 cli.add_command(call_graph.cli, name="call-graph")
+cli.add_command(check_nc.cli, name="check-nc")
 cli.add_command(create_recipe.cli, name="create-recipe")
 cli.add_command(intp_lvl.cli, name="intp-lvl")
 
