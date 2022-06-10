@@ -13,6 +13,7 @@ repos:
     -   id: check-case-conflict
     -   id: check-docstring-first
     -   id: check-symlinks
+        exclude: links/
     -   id: check-toml
     -   id: check-yaml
         exclude: meta.yaml
