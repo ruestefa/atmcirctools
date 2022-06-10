@@ -85,7 +85,9 @@ with open("requirements.in") as f:
     install_requires: list[str] = list(map(str, parse_requirements(f.readlines())))
 
 # Format: command=package.module:function
-console_scripts: list[str] = []
+console_scripts: list[str] = [
+    "act=atmcirctools.bin.act:cli",
+]
 
 setup(
     packages=find_packages("src"),
